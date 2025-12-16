@@ -21,6 +21,17 @@ use App\Http\Controllers\Api\BusinessTripController;
 use App\Http\Controllers\Api\GrievanceController;
 use App\Http\Controllers\Api\CompanyNoticeController;
 use App\Http\Controllers\Api\CompanyHolidayController;
+use App\Http\Controllers\Api\TimeOffCategoryController;
+use App\Http\Controllers\Api\TimeOffRequestController;
+use App\Http\Controllers\Api\WorkLogController;
+use App\Http\Controllers\Api\CompensationCategoryController;
+use App\Http\Controllers\Api\BenefitTypeController;
+use App\Http\Controllers\Api\AdvanceTypeController;
+use App\Http\Controllers\Api\WithholdingTypeController;
+use App\Http\Controllers\Api\StaffBenefitController;
+use App\Http\Controllers\Api\IncentiveRecordController;
+use App\Http\Controllers\Api\SalaryAdvanceController;
+use App\Http\Controllers\Api\RecurringDeductionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,4 +111,38 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('company-holidays', CompanyHolidayController::class);
     Route::post('/company-holidays/bulk-import', [CompanyHolidayController::class, 'bulkImport']);
+
+    // ============================================
+    // PROMPT SET 7: Leave Management
+    // ============================================
+    Route::apiResource('time-off-categories', TimeOffCategoryController::class);
+    Route::apiResource('time-off-requests', TimeOffRequestController::class);
+    Route::post('/time-off-requests/{timeOffRequest}/process', [TimeOffRequestController::class, 'processApproval']);
+    Route::get('/time-off-balance', [TimeOffRequestController::class, 'getBalance']);
+
+    // ============================================
+    // PROMPT SET 8: Attendance Management
+    // ============================================
+    Route::apiResource('work-logs', WorkLogController::class);
+    Route::post('/clock-in', [WorkLogController::class, 'clockIn']);
+    Route::post('/clock-out', [WorkLogController::class, 'clockOut']);
+    Route::post('/work-logs/bulk', [WorkLogController::class, 'bulkStore']);
+    Route::get('/attendance-summary', [WorkLogController::class, 'summary']);
+
+    // ============================================
+    // PROMPT SET 9: Payroll Setup
+    // ============================================
+    Route::apiResource('compensation-categories', CompensationCategoryController::class);
+    Route::apiResource('benefit-types', BenefitTypeController::class);
+    Route::apiResource('advance-types', AdvanceTypeController::class);
+    Route::apiResource('withholding-types', WithholdingTypeController::class);
+
+    // ============================================
+    // PROMPT SET 10: Salary Components
+    // ============================================
+    Route::apiResource('staff-benefits', StaffBenefitController::class);
+    Route::apiResource('incentive-records', IncentiveRecordController::class);
+    Route::apiResource('salary-advances', SalaryAdvanceController::class);
+    Route::post('/salary-advances/{salaryAdvance}/payment', [SalaryAdvanceController::class, 'recordPayment']);
+    Route::apiResource('recurring-deductions', RecurringDeductionController::class);
 });
