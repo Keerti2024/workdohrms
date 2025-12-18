@@ -1,0 +1,240 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
+
+export const authService = {
+  login: (email: string, password: string) => 
+    api.post('/auth/sign-in', { email, password }),
+  register: (data: { name: string; email: string; password: string; password_confirmation: string }) =>
+    api.post('/auth/sign-up', data),
+  logout: () => api.post('/auth/sign-out'),
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (data: { token: string; email: string; password: string; password_confirmation: string }) =>
+    api.post('/auth/reset-password', data),
+  getProfile: () => api.get('/auth/profile'),
+};
+
+export const dashboardService = {
+  getStats: () => api.get('/dashboard'),
+  getEmployeeStats: () => api.get('/dashboard/employee-stats'),
+  getAttendanceStats: () => api.get('/dashboard/attendance-stats'),
+  getLeaveStats: () => api.get('/dashboard/leave-stats'),
+};
+
+export const staffService = {
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => 
+    api.get('/staff-members', { params }),
+  getById: (id: number) => api.get(`/staff-members/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/staff-members', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/staff-members/${id}`, data),
+  delete: (id: number) => api.delete(`/staff-members/${id}`),
+  getDocuments: (id: number) => api.get(`/staff-members/${id}/documents`),
+  uploadDocument: (id: number, data: FormData) => 
+    api.post(`/staff-members/${id}/documents`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+};
+
+export const attendanceService = {
+  clockIn: () => api.post('/clock-in'),
+  clockOut: () => api.post('/clock-out'),
+  getWorkLogs: (params?: { staff_member_id?: number; start_date?: string; end_date?: string; page?: number }) =>
+    api.get('/work-logs', { params }),
+  getSummary: (params: { staff_member_id: number; start_date: string; end_date: string }) =>
+    api.get('/attendance-summary', { params }),
+  getShifts: () => api.get('/shifts'),
+  createShift: (data: Record<string, unknown>) => api.post('/shifts', data),
+  updateShift: (id: number, data: Record<string, unknown>) => api.put(`/shifts/${id}`, data),
+  deleteShift: (id: number) => api.delete(`/shifts/${id}`),
+};
+
+export const leaveService = {
+  getCategories: () => api.get('/time-off-categories'),
+  createCategory: (data: Record<string, unknown>) => api.post('/time-off-categories', data),
+  updateCategory: (id: number, data: Record<string, unknown>) => api.put(`/time-off-categories/${id}`, data),
+  deleteCategory: (id: number) => api.delete(`/time-off-categories/${id}`),
+  getRequests: (params?: { status?: string; page?: number }) => api.get('/time-off-requests', { params }),
+  createRequest: (data: Record<string, unknown>) => api.post('/time-off-requests', data),
+  processRequest: (id: number, data: { action: 'approve' | 'decline'; remarks?: string }) =>
+    api.post(`/time-off-requests/${id}/process`, data),
+  getBalances: (staffMemberId: number) => api.get(`/staff-members/${staffMemberId}/leave-balances`),
+};
+
+export const payrollService = {
+  getSalarySlips: (params?: { staff_member_id?: number; salary_period?: string; page?: number }) =>
+    api.get('/salary-slips', { params }),
+  generateSlip: (data: { staff_member_id: number; salary_period: string }) =>
+    api.post('/salary-slips/generate', data),
+  bulkGenerate: (data: { staff_member_ids: number[]; salary_period: string }) =>
+    api.post('/salary-slips/bulk-generate', data),
+  getSlipById: (id: number) => api.get(`/salary-slips/${id}`),
+  downloadSlip: (id: number) => api.get(`/salary-slips/${id}/download`, { responseType: 'blob' }),
+  getBenefits: (staffMemberId: number) => api.get(`/staff-members/${staffMemberId}/benefits`),
+  getDeductions: (staffMemberId: number) => api.get(`/staff-members/${staffMemberId}/deductions`),
+  getTaxSlabs: () => api.get('/tax-slabs'),
+  calculateTax: (data: { annual_income: number }) => api.post('/tax-slabs/calculate', data),
+};
+
+export const recruitmentService = {
+  getJobs: (params?: { status?: string; page?: number }) => api.get('/jobs', { params }),
+  createJob: (data: Record<string, unknown>) => api.post('/jobs', data),
+  updateJob: (id: number, data: Record<string, unknown>) => api.put(`/jobs/${id}`, data),
+  deleteJob: (id: number) => api.delete(`/jobs/${id}`),
+  publishJob: (id: number) => api.post(`/jobs/${id}/publish`),
+  closeJob: (id: number) => api.post(`/jobs/${id}/close`),
+  getCandidates: (params?: { job_id?: number; page?: number }) => api.get('/candidates', { params }),
+  getCandidate: (id: number) => api.get(`/candidates/${id}`),
+  createCandidate: (data: Record<string, unknown>) => api.post('/candidates', data),
+  updateCandidate: (id: number, data: Record<string, unknown>) => api.put(`/candidates/${id}`, data),
+  getApplications: (params?: { job_id?: number; status?: string; page?: number }) =>
+    api.get('/job-applications', { params }),
+  updateApplicationStatus: (id: number, data: { status: string }) =>
+    api.put(`/job-applications/${id}/status`, data),
+  getInterviews: (params?: { page?: number }) => api.get('/interview-schedules', { params }),
+  scheduleInterview: (data: Record<string, unknown>) => api.post('/interview-schedules', data),
+  submitFeedback: (id: number, data: Record<string, unknown>) =>
+    api.post(`/interview-schedules/${id}/feedback`, data),
+};
+
+export const performanceService = {
+  getGoals: (params?: { staff_member_id?: number; page?: number }) => api.get('/goals', { params }),
+  createGoal: (data: Record<string, unknown>) => api.post('/goals', data),
+  updateGoal: (id: number, data: Record<string, unknown>) => api.put(`/goals/${id}`, data),
+  deleteGoal: (id: number) => api.delete(`/goals/${id}`),
+  getKPIs: (params?: { staff_member_id?: number }) => api.get('/kpis', { params }),
+  createKPI: (data: Record<string, unknown>) => api.post('/kpis', data),
+  getAppraisals: (params?: { staff_member_id?: number; page?: number }) => api.get('/appraisals', { params }),
+  createAppraisal: (data: Record<string, unknown>) => api.post('/appraisals', data),
+  getCompetencies: () => api.get('/competencies'),
+};
+
+export const assetService = {
+  getAll: (params?: { type_id?: number; status?: string; page?: number; search?: string }) => api.get('/assets', { params }),
+  getAssetTypes: () => api.get('/asset-types'),
+  createAssetType: (data: Record<string, unknown>) => api.post('/asset-types', data),
+  getAssets: (params?: { type_id?: number; status?: string; page?: number }) => api.get('/assets', { params }),
+  createAsset: (data: Record<string, unknown>) => api.post('/assets', data),
+  updateAsset: (id: number, data: Record<string, unknown>) => api.put(`/assets/${id}`, data),
+  deleteAsset: (id: number) => api.delete(`/assets/${id}`),
+  getAssignments: (params?: { asset_id?: number; staff_member_id?: number }) =>
+    api.get('/asset-assignments', { params }),
+  assignAsset: (data: Record<string, unknown>) => api.post('/asset-assignments', data),
+  returnAsset: (id: number) => api.post(`/asset-assignments/${id}/return`),
+};
+
+export const trainingService = {
+  getPrograms: (params?: { page?: number }) => api.get('/training-programs', { params }),
+  createProgram: (data: Record<string, unknown>) => api.post('/training-programs', data),
+  updateProgram: (id: number, data: Record<string, unknown>) => api.put(`/training-programs/${id}`, data),
+  deleteProgram: (id: number) => api.delete(`/training-programs/${id}`),
+  getEnrollments: (params?: { program_id?: number; staff_member_id?: number }) =>
+    api.get('/training-enrollments', { params }),
+  enroll: (data: Record<string, unknown>) => api.post('/training-enrollments', data),
+  completeEnrollment: (id: number, data: Record<string, unknown>) =>
+    api.post(`/training-enrollments/${id}/complete`, data),
+};
+
+export const contractService = {
+  getAll: (params?: { staff_member_id?: number; status?: string; page?: number }) =>
+    api.get('/contracts', { params }),
+  getContracts: (params?: { staff_member_id?: number; status?: string; page?: number }) =>
+    api.get('/contracts', { params }),
+  createContract: (data: Record<string, unknown>) => api.post('/contracts', data),
+  updateContract: (id: number, data: Record<string, unknown>) => api.put(`/contracts/${id}`, data),
+  deleteContract: (id: number) => api.delete(`/contracts/${id}`),
+  renewContract: (id: number, data: Record<string, unknown>) => api.post(`/contracts/${id}/renew`, data),
+  terminateContract: (id: number, data: Record<string, unknown>) => api.post(`/contracts/${id}/terminate`, data),
+};
+
+export const meetingService = {
+  getAll: (params?: { page?: number }) => api.get('/meetings', { params }),
+  getMeetings: (params?: { page?: number }) => api.get('/meetings', { params }),
+  createMeeting: (data: Record<string, unknown>) => api.post('/meetings', data),
+  updateMeeting: (id: number, data: Record<string, unknown>) => api.put(`/meetings/${id}`, data),
+  deleteMeeting: (id: number) => api.delete(`/meetings/${id}`),
+  getParticipants: (meetingId: number) => api.get(`/meetings/${meetingId}/participants`),
+  addParticipant: (meetingId: number, data: Record<string, unknown>) =>
+    api.post(`/meetings/${meetingId}/participants`, data),
+};
+
+export const reportService = {
+  getAttendanceReport: (params: { start_date: string; end_date: string; staff_member_id?: number; type?: string }) =>
+    api.get('/reports/attendance', { params }),
+  getLeaveReport: (params: { start_date: string; end_date: string; staff_member_id?: number }) =>
+    api.get('/reports/leave', { params }),
+  getPayrollReport: (params: { salary_period: string }) =>
+    api.get('/reports/payroll', { params }),
+  getHeadcountReport: () => api.get('/reports/headcount'),
+  getTurnoverReport: (params: { year: number }) => api.get('/reports/turnover', { params }),
+  exportAttendanceReport: (params: { start_date: string; end_date: string; type?: string; format: string }) =>
+    api.get('/reports/attendance/export', { params, responseType: 'blob' }),
+  exportLeaveReport: (params: { start_date: string; end_date: string; format: string }) =>
+    api.get('/reports/leave/export', { params, responseType: 'blob' }),
+  exportPayrollReport: (params: { salary_period: string; format: string }) =>
+    api.get('/reports/payroll/export', { params, responseType: 'blob' }),
+};
+
+export const settingsService = {
+  getOfficeLocations: () => api.get('/office-locations'),
+  createOfficeLocation: (data: Record<string, unknown>) => api.post('/office-locations', data),
+  updateOfficeLocation: (id: number, data: Record<string, unknown>) => api.put(`/office-locations/${id}`, data),
+  deleteOfficeLocation: (id: number) => api.delete(`/office-locations/${id}`),
+  getDivisions: () => api.get('/divisions'),
+  createDivision: (data: Record<string, unknown>) => api.post('/divisions', data),
+  updateDivision: (id: number, data: Record<string, unknown>) => api.put(`/divisions/${id}`, data),
+  deleteDivision: (id: number) => api.delete(`/divisions/${id}`),
+  getJobTitles: () => api.get('/job-titles'),
+  createJobTitle: (data: Record<string, unknown>) => api.post('/job-titles', data),
+  updateJobTitle: (id: number, data: Record<string, unknown>) => api.put(`/job-titles/${id}`, data),
+  deleteJobTitle: (id: number) => api.delete(`/job-titles/${id}`),
+  getHolidays: () => api.get('/company-holidays'),
+  createHoliday: (data: Record<string, unknown>) => api.post('/company-holidays', data),
+  updateHoliday: (id: number, data: Record<string, unknown>) => api.put(`/company-holidays/${id}`, data),
+  deleteHoliday: (id: number) => api.delete(`/company-holidays/${id}`),
+  getNotices: () => api.get('/company-notices'),
+  createNotice: (data: Record<string, unknown>) => api.post('/company-notices', data),
+};
+
+export const adminService = {
+  getUsers: (params?: { page?: number; search?: string }) => api.get('/users', { params }),
+  createUser: (data: Record<string, unknown>) => api.post('/users', data),
+  updateUser: (id: number, data: Record<string, unknown>) => api.put(`/users/${id}`, data),
+  deleteUser: (id: number) => api.delete(`/users/${id}`),
+  getRoles: () => api.get('/roles'),
+  createRole: (data: Record<string, unknown>) => api.post('/roles', data),
+  updateRole: (id: number, data: Record<string, unknown>) => api.put(`/roles/${id}`, data),
+  deleteRole: (id: number) => api.delete(`/roles/${id}`),
+  getPermissions: (params?: { page?: number; search?: string; module?: string }) => api.get('/permissions', { params }),
+  assignPermissions: (roleId: number, data: { permissions: string[] }) =>
+    api.post(`/roles/${roleId}/permissions`, data),
+};

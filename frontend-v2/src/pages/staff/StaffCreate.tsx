@@ -1,0 +1,444 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { staffService, settingsService } from '../../services/api';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Textarea } from '../../components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+
+interface SelectOption {
+  id: number;
+  name: string;
+}
+
+export default function StaffCreate() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [locations, setLocations] = useState<SelectOption[]>([]);
+  const [divisions, setDivisions] = useState<SelectOption[]>([]);
+  const [jobTitles, setJobTitles] = useState<SelectOption[]>([]);
+
+  const [formData, setFormData] = useState({
+    full_name: '',
+    personal_email: '',
+    work_email: '',
+    phone_number: '',
+    date_of_birth: '',
+    gender: '',
+    address: '',
+    city: '',
+    state: '',
+    country: '',
+    postal_code: '',
+    office_location_id: '',
+    division_id: '',
+    job_title_id: '',
+    hire_date: '',
+    employment_status: 'active',
+    employment_type: 'full_time',
+    compensation_type: 'monthly',
+    base_salary: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    emergency_contact_relationship: '',
+  });
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [locRes, divRes, jobRes] = await Promise.all([
+          settingsService.getOfficeLocations(),
+          settingsService.getDivisions(),
+          settingsService.getJobTitles(),
+        ]);
+        setLocations(locRes.data.data || []);
+        setDivisions(divRes.data.data || []);
+        setJobTitles(jobRes.data.data || []);
+      } catch (error) {
+        console.error('Failed to fetch options:', error);
+      }
+    };
+    fetchOptions();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await staffService.create(formData);
+      navigate('/staff');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Failed to create staff member');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-solarized-base02">Add New Staff</h1>
+          <p className="text-solarized-base01">Create a new employee record</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid gap-6">
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Personal Information</CardTitle>
+              <CardDescription>Basic details about the employee</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Full Name *</Label>
+                <Input
+                  id="full_name"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="personal_email">Personal Email *</Label>
+                <Input
+                  id="personal_email"
+                  name="personal_email"
+                  type="email"
+                  value={formData.personal_email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="work_email">Work Email</Label>
+                <Input
+                  id="work_email"
+                  name="work_email"
+                  type="email"
+                  value={formData.work_email}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone_number">Phone Number</Label>
+                <Input
+                  id="phone_number"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="date_of_birth">Date of Birth</Label>
+                <Input
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  type="date"
+                  value={formData.date_of_birth}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  value={formData.gender}
+                  onValueChange={(value) => handleSelectChange('gender', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Address</CardTitle>
+              <CardDescription>Employee's residential address</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="address">Street Address</Label>
+                <Textarea
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="postal_code">Postal Code</Label>
+                <Input
+                  id="postal_code"
+                  name="postal_code"
+                  value={formData.postal_code}
+                  onChange={handleChange}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Employment Details</CardTitle>
+              <CardDescription>Job and compensation information</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="office_location_id">Office Location</Label>
+                <Select
+                  value={formData.office_location_id}
+                  onValueChange={(value) => handleSelectChange('office_location_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id.toString()}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="division_id">Division</Label>
+                <Select
+                  value={formData.division_id}
+                  onValueChange={(value) => handleSelectChange('division_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select division" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {divisions.map((div) => (
+                      <SelectItem key={div.id} value={div.id.toString()}>
+                        {div.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="job_title_id">Job Title</Label>
+                <Select
+                  value={formData.job_title_id}
+                  onValueChange={(value) => handleSelectChange('job_title_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTitles.map((job) => (
+                      <SelectItem key={job.id} value={job.id.toString()}>
+                        {job.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hire_date">Hire Date *</Label>
+                <Input
+                  id="hire_date"
+                  name="hire_date"
+                  type="date"
+                  value={formData.hire_date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employment_status">Employment Status</Label>
+                <Select
+                  value={formData.employment_status}
+                  onValueChange={(value) => handleSelectChange('employment_status', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="on_leave">On Leave</SelectItem>
+                    <SelectItem value="terminated">Terminated</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employment_type">Employment Type</Label>
+                <Select
+                  value={formData.employment_type}
+                  onValueChange={(value) => handleSelectChange('employment_type', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_time">Full Time</SelectItem>
+                    <SelectItem value="part_time">Part Time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="intern">Intern</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="compensation_type">Compensation Type</Label>
+                <Select
+                  value={formData.compensation_type}
+                  onValueChange={(value) => handleSelectChange('compensation_type', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="base_salary">Base Salary</Label>
+                <Input
+                  id="base_salary"
+                  name="base_salary"
+                  type="number"
+                  value={formData.base_salary}
+                  onChange={handleChange}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Emergency Contact</CardTitle>
+              <CardDescription>Person to contact in case of emergency</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="emergency_contact_name">Contact Name</Label>
+                <Input
+                  id="emergency_contact_name"
+                  name="emergency_contact_name"
+                  value={formData.emergency_contact_name}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="emergency_contact_phone">Contact Phone</Label>
+                <Input
+                  id="emergency_contact_phone"
+                  name="emergency_contact_phone"
+                  value={formData.emergency_contact_phone}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="emergency_contact_relationship">Relationship</Label>
+                <Input
+                  id="emergency_contact_relationship"
+                  name="emergency_contact_relationship"
+                  value={formData.emergency_contact_relationship}
+                  onChange={handleChange}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-solarized-blue hover:bg-solarized-blue/90"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Staff'
+              )}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}

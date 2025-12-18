@@ -1,0 +1,270 @@
+import { useState, useEffect } from 'react';
+import { settingsService } from '../../services/api';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Textarea } from '../../components/ui/textarea';
+import { Badge } from '../../components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog';
+import { Skeleton } from '../../components/ui/skeleton';
+import { Plus, MapPin, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu';
+
+interface Location {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  is_active: boolean;
+}
+
+export default function OfficeLocations() {
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    address: '',
+    city: '',
+    country: '',
+  });
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
+  const fetchLocations = async () => {
+    setIsLoading(true);
+    try {
+      const response = await settingsService.getOfficeLocations();
+      setLocations(response.data.data || []);
+    } catch (error) {
+      console.error('Failed to fetch locations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingLocation) {
+        await settingsService.updateOfficeLocation(editingLocation.id, formData);
+      } else {
+        await settingsService.createOfficeLocation(formData);
+      }
+      setIsDialogOpen(false);
+      setEditingLocation(null);
+      resetForm();
+      fetchLocations();
+    } catch (error) {
+      console.error('Failed to save location:', error);
+    }
+  };
+
+  const handleEdit = (location: Location) => {
+    setEditingLocation(location);
+    setFormData({
+      name: location.name,
+      address: location.address,
+      city: location.city,
+      country: location.country,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this location?')) return;
+    try {
+      await settingsService.deleteOfficeLocation(id);
+      fetchLocations();
+    } catch (error) {
+      console.error('Failed to delete location:', error);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', address: '', city: '', country: '' });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-solarized-base02">Office Locations</h1>
+          <p className="text-solarized-base01">Manage company office locations</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-solarized-blue hover:bg-solarized-blue/90"
+              onClick={() => {
+                setEditingLocation(null);
+                resetForm();
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Location
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingLocation ? 'Edit Location' : 'Add New Location'}</DialogTitle>
+              <DialogDescription>
+                {editingLocation ? 'Update the office location details.' : 'Add a new office location.'}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Location Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Headquarters"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="Street address"
+                    rows={2}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-solarized-blue hover:bg-solarized-blue/90">
+                  {editingLocation ? 'Update' : 'Create'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card className="border-0 shadow-md">
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : locations.length === 0 ? (
+            <div className="text-center py-12">
+              <MapPin className="h-12 w-12 text-solarized-base01 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-solarized-base02">No locations configured</h3>
+              <p className="text-solarized-base01 mt-1">Add your first office location.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Country</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {locations.map((location) => (
+                  <TableRow key={location.id}>
+                    <TableCell className="font-medium">{location.name}</TableCell>
+                    <TableCell>{location.address || '-'}</TableCell>
+                    <TableCell>{location.city || '-'}</TableCell>
+                    <TableCell>{location.country || '-'}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          location.is_active
+                            ? 'bg-solarized-green/10 text-solarized-green'
+                            : 'bg-solarized-base01/10 text-solarized-base01'
+                        }
+                      >
+                        {location.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(location)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(location.id)}
+                            className="text-solarized-red"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
