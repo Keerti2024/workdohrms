@@ -6,7 +6,46 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Shield, Users, Briefcase, User } from 'lucide-react';
+
+const DEMO_ACCOUNTS = [
+  {
+    role: 'Administrator',
+    email: 'admin@hrms.local',
+    password: 'password',
+    icon: Shield,
+    color: 'bg-solarized-red',
+    permissions: 'Full system access (581 permissions)',
+    description: 'Complete control over all modules, users, and settings',
+  },
+  {
+    role: 'HR Officer',
+    email: 'hr@hrms.local',
+    password: 'password',
+    icon: Users,
+    color: 'bg-solarized-blue',
+    permissions: '~400 permissions',
+    description: 'Manage employees, leave, payroll, recruitment',
+  },
+  {
+    role: 'Manager',
+    email: 'manager@hrms.local',
+    password: 'password',
+    icon: Briefcase,
+    color: 'bg-solarized-yellow',
+    permissions: '~200 permissions',
+    description: 'Approve team leave, view attendance, performance reviews',
+  },
+  {
+    role: 'Staff Member',
+    email: 'staff@hrms.local',
+    password: 'password',
+    icon: User,
+    color: 'bg-solarized-green',
+    permissions: '~50 permissions',
+    description: 'Self-service: clock in/out, apply leave, view payslips',
+  },
+];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +54,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +69,21 @@ export default function Login() {
       setError(error.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string, role: string) => {
+    setError('');
+    setDemoLoading(role);
+
+    try {
+      await login(demoEmail, demoPassword);
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || `Failed to login as ${role}. Please try again.`);
+    } finally {
+      setDemoLoading(null);
     }
   };
 
@@ -104,6 +159,46 @@ export default function Login() {
           </p>
         </CardFooter>
       </form>
+      
+      <div className="mt-6 pt-6 border-t border-solarized-base2">
+        <p className="text-sm font-medium text-solarized-base01 mb-4 text-center">
+          Quick Demo Login
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {DEMO_ACCOUNTS.map((account) => {
+            const Icon = account.icon;
+            return (
+              <Button
+                key={account.role}
+                type="button"
+                variant="outline"
+                className="h-auto py-3 px-3 flex flex-col items-start gap-1 hover:bg-solarized-base2/50 relative group"
+                onClick={() => handleDemoLogin(account.email, account.password, account.role)}
+                disabled={demoLoading !== null || isLoading}
+              >
+                {demoLoading === account.role ? (
+                  <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 w-full">
+                      <div className={`w-6 h-6 rounded-full ${account.color} flex items-center justify-center`}>
+                        <Icon className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="font-medium text-sm">{account.role}</span>
+                    </div>
+                    <span className="text-xs text-solarized-base01 text-left">
+                      {account.permissions}
+                    </span>
+                  </>
+                )}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-solarized-base02 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  {account.description}
+                </div>
+              </Button>
+            );
+          })}
+        </div>
+      </div>
     </Card>
   );
 }

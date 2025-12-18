@@ -29,13 +29,39 @@ import {
   Cell,
 } from 'recharts';
 
-interface DashboardStats {
-  total_employees: number;
-  present_today: number;
-  absent_today: number;
-  on_leave_today: number;
-  pending_leave_requests: number;
-  pending_approvals: number;
+interface EmployeeStats {
+  total: number;
+  active: number;
+  on_leave: number;
+  inactive: number;
+  new_this_month: number;
+}
+
+interface AttendanceStats {
+  present: number;
+  absent: number;
+  not_marked: number;
+}
+
+interface LeaveStats {
+  pending: number;
+  approved_this_month: number;
+}
+
+interface DashboardData {
+  employees: EmployeeStats;
+  attendance_today: AttendanceStats;
+  leave_requests: LeaveStats;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
 }
 
 interface AttendanceData {
@@ -48,33 +74,43 @@ const COLORS = ['#859900', '#dc322f', '#b58900', '#268bd2'];
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [clockedIn, setClockedIn] = useState(false);
   const [clockLoading, setClockLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [dashboardRes] = await Promise.all([
-          dashboardService.getStats(),
-        ]);
-        setStats(dashboardRes.data.data);
+        setError(null);
+        const dashboardRes = await dashboardService.getStats();
         
+        if (dashboardRes.data.success && dashboardRes.data.data) {
+          setDashboardData(dashboardRes.data.data);
+        } else {
+          setError(dashboardRes.data.message || 'Failed to load dashboard data');
+        }
+        
+        // Generate attendance trend data based on actual data or mock
         const mockAttendance: AttendanceData[] = [];
         for (let i = 6; i >= 0; i--) {
           const date = new Date();
           date.setDate(date.getDate() - i);
+          const totalEmployees = dashboardRes.data.data?.employees?.total || 10;
           mockAttendance.push({
             date: date.toLocaleDateString('en-US', { weekday: 'short' }),
-            present: Math.floor(Math.random() * 20) + 80,
-            absent: Math.floor(Math.random() * 10) + 5,
+            present: Math.floor(Math.random() * (totalEmployees * 0.2)) + Math.floor(totalEmployees * 0.8),
+            absent: Math.floor(Math.random() * (totalEmployees * 0.1)) + 1,
           });
         }
         setAttendanceData(mockAttendance);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+      } catch (err) {
+        const apiError = err as ApiError;
+        const errorMessage = apiError.response?.data?.message || apiError.message || 'Failed to fetch dashboard data';
+        setError(errorMessage);
+        console.error('Failed to fetch dashboard data:', err);
       } finally {
         setIsLoading(false);
       }
@@ -107,10 +143,10 @@ export default function Dashboard() {
     }
   };
 
-  const pieData = stats ? [
-    { name: 'Present', value: stats.present_today },
-    { name: 'Absent', value: stats.absent_today },
-    { name: 'On Leave', value: stats.on_leave_today },
+  const pieData = dashboardData ? [
+    { name: 'Present', value: dashboardData.attendance_today?.present || 0 },
+    { name: 'Absent', value: dashboardData.attendance_today?.absent || 0 },
+    { name: 'Not Marked', value: dashboardData.attendance_today?.not_marked || 0 },
   ] : [];
 
   if (isLoading) {
@@ -134,6 +170,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-solarized-red/10 border border-solarized-red/20 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-solarized-red" />
+            <p className="text-solarized-red font-medium">Error loading dashboard</p>
+          </div>
+          <p className="text-solarized-base01 text-sm mt-1">{error}</p>
+        </div>
+      )}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-solarized-base02">
@@ -177,11 +223,11 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-solarized-base02">
-              {stats?.total_employees || 0}
+              {dashboardData?.employees?.total || 0}
             </div>
             <p className="text-xs text-solarized-base01 mt-1">
               <TrendingUp className="inline h-3 w-3 text-solarized-green mr-1" />
-              +2 from last month
+              +{dashboardData?.employees?.new_this_month || 0} this month
             </p>
           </CardContent>
         </Card>
@@ -195,11 +241,11 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-solarized-base02">
-              {stats?.present_today || 0}
+              {dashboardData?.attendance_today?.present || 0}
             </div>
             <p className="text-xs text-solarized-base01 mt-1">
-              {stats && stats.total_employees > 0
-                ? `${Math.round((stats.present_today / stats.total_employees) * 100)}% attendance rate`
+              {dashboardData?.employees?.total && dashboardData.employees.total > 0
+                ? `${Math.round(((dashboardData.attendance_today?.present || 0) / dashboardData.employees.total) * 100)}% attendance rate`
                 : '0% attendance rate'}
             </p>
           </CardContent>
@@ -208,16 +254,16 @@ export default function Dashboard() {
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-solarized-base01">
-              On Leave
+              Not Marked
             </CardTitle>
             <Calendar className="h-5 w-5 text-solarized-yellow" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-solarized-base02">
-              {stats?.on_leave_today || 0}
+              {dashboardData?.attendance_today?.not_marked || 0}
             </div>
             <p className="text-xs text-solarized-base01 mt-1">
-              {stats?.pending_leave_requests || 0} pending requests
+              {dashboardData?.leave_requests?.approved_this_month || 0} leave approved this month
             </p>
           </CardContent>
         </Card>
@@ -231,7 +277,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-solarized-base02">
-              {stats?.pending_approvals || 0}
+              {dashboardData?.leave_requests?.pending || 0}
             </div>
             <Link to="/leave/approvals" className="text-xs text-solarized-blue hover:underline mt-1 inline-flex items-center">
               View all <ArrowRight className="h-3 w-3 ml-1" />

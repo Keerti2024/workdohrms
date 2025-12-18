@@ -22,6 +22,7 @@ class UiDemoSeeder extends Seeder
     {
         $this->command->info('Seeding UI demo data...');
 
+        // Create demo users for each role
         $adminUser = User::where('email', 'admin@hrms.local')->first();
         if (!$adminUser) {
             $adminUser = User::create([
@@ -30,6 +31,39 @@ class UiDemoSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]);
             $adminUser->assignRole('administrator');
+        }
+
+        // HR Officer demo account
+        $hrUser = User::where('email', 'hr@hrms.local')->first();
+        if (!$hrUser) {
+            $hrUser = User::create([
+                'name' => 'HR Officer',
+                'email' => 'hr@hrms.local',
+                'password' => Hash::make('password'),
+            ]);
+            $hrUser->assignRole('hr_officer');
+        }
+
+        // Manager demo account
+        $managerUser = User::where('email', 'manager@hrms.local')->first();
+        if (!$managerUser) {
+            $managerUser = User::create([
+                'name' => 'Team Manager',
+                'email' => 'manager@hrms.local',
+                'password' => Hash::make('password'),
+            ]);
+            $managerUser->assignRole('manager');
+        }
+
+        // Staff Member demo account
+        $staffUser = User::where('email', 'staff@hrms.local')->first();
+        if (!$staffUser) {
+            $staffUser = User::create([
+                'name' => 'Staff Member',
+                'email' => 'staff@hrms.local',
+                'password' => Hash::make('password'),
+            ]);
+            $staffUser->assignRole('staff_member');
         }
 
         $headquarters = OfficeLocation::firstOrCreate(
