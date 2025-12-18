@@ -1,0 +1,2956 @@
+{
+  "info": {
+    "_postman_id": "workdo-hrm-api-collection",
+    "name": "WorkDo HRM API",
+    "description": "Complete API collection for WorkDo HRM system built with Laravel and Spatie Permission",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "auth_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('auth_token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"company@example.com\",\n    \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"token\": \"reset_token_here\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard?period=month",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard"],
+              "query": [
+                {"key": "period", "value": "month"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "List Users",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/users?page=1&per_page=10&search=&role=",
+                  "host": ["{{base_url}}"],
+                  "path": ["users"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "search", "value": ""},
+                    {"key": "role", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/users/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"employee\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/users",
+                  "host": ["{{base_url}}"],
+                  "path": ["users"]
+                }
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"John Doe Updated\",\n    \"email\": \"john.updated@example.com\",\n    \"role\": \"hr\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/users/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1"]
+                }
+              }
+            },
+            {
+              "name": "Reset User Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/1/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1", "reset-password"]
+                }
+              }
+            },
+            {
+              "name": "Activate User",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/users/1/activate",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1", "activate"]
+                }
+              }
+            },
+            {
+              "name": "Deactivate User",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/users/1/deactivate",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "1", "deactivate"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Roles",
+          "item": [
+            {
+              "name": "List Roles",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/roles",
+                  "host": ["{{base_url}}"],
+                  "path": ["roles"]
+                }
+              }
+            },
+            {
+              "name": "Get Role",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/roles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["roles", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Role",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"custom_role\",\n    \"permissions\": [\"view_dashboard\", \"view_employees\", \"view_leaves\"]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/roles",
+                  "host": ["{{base_url}}"],
+                  "path": ["roles"]
+                }
+              }
+            },
+            {
+              "name": "Update Role",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"custom_role_updated\",\n    \"permissions\": [\"view_dashboard\", \"view_employees\", \"view_leaves\", \"create_leaves\"]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/roles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["roles", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Role",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/roles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["roles", "1"]
+                }
+              }
+            },
+            {
+              "name": "List All Permissions",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["permissions"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HR Management",
+      "item": [
+        {
+          "name": "Branches",
+          "item": [
+            {
+              "name": "List Branches",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/branches?page=1&per_page=10&search=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["branches"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "search", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Branch",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/branches/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["branches", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Branch",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New York Office\",\n    \"address\": \"123 Main Street\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"zip_code\": \"10001\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/branches",
+                  "host": ["{{base_url}}"],
+                  "path": ["branches"]
+                }
+              }
+            },
+            {
+              "name": "Update Branch",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New York Office Updated\",\n    \"address\": \"456 Broadway\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"zip_code\": \"10002\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/branches/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["branches", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Branch",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/branches/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["branches", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Departments",
+          "item": [
+            {
+              "name": "List Departments",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/departments?page=1&per_page=10&branch_id=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["departments"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "branch_id", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Department",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/departments/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["departments", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Department",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Engineering\",\n    \"branch_id\": 1,\n    \"description\": \"Software Engineering Department\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/departments",
+                  "host": ["{{base_url}}"],
+                  "path": ["departments"]
+                }
+              }
+            },
+            {
+              "name": "Update Department",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Engineering Updated\",\n    \"branch_id\": 1,\n    \"description\": \"Updated description\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/departments/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["departments", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Department",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/departments/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["departments", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Designations",
+          "item": [
+            {
+              "name": "List Designations",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/designations?page=1&per_page=10&department_id=",
+                  "host": ["{{base_url}}"],
+                  "path": ["designations"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "department_id", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Designation",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/designations/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["designations", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Designation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Senior Developer\",\n    \"department_id\": 1,\n    \"description\": \"Senior Software Developer\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/designations",
+                  "host": ["{{base_url}}"],
+                  "path": ["designations"]
+                }
+              }
+            },
+            {
+              "name": "Update Designation",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Lead Developer\",\n    \"department_id\": 1,\n    \"description\": \"Lead Software Developer\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/designations/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["designations", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Designation",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/designations/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["designations", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Employees",
+          "item": [
+            {
+              "name": "List Employees",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employees?page=1&per_page=10&search=&branch_id=&department_id=&designation_id=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "search", "value": ""},
+                    {"key": "branch_id", "value": ""},
+                    {"key": "department_id", "value": ""},
+                    {"key": "designation_id", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Employee",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employees/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees", "1"]
+                }
+              }
+            },
+            {
+              "name": "Get My Profile",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employees/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees", "profile"]
+                }
+              }
+            },
+            {
+              "name": "Create Employee",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"date_of_birth\": \"1990-01-15\",\n    \"gender\": \"male\",\n    \"marital_status\": \"single\",\n    \"employee_id\": \"EMP001\",\n    \"branch_id\": 1,\n    \"department_id\": 1,\n    \"designation_id\": 1,\n    \"date_of_joining\": \"2024-01-01\",\n    \"employment_type\": \"full-time\",\n    \"shift_id\": 1,\n    \"address_line_1\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"postal_code\": \"10001\",\n    \"emergency_contact_name\": \"Jane Doe\",\n    \"emergency_contact_relationship\": \"Spouse\",\n    \"emergency_contact_phone\": \"+1234567891\",\n    \"bank_name\": \"Chase Bank\",\n    \"account_holder_name\": \"John Doe\",\n    \"account_number\": \"1234567890\",\n    \"bank_identifier_code\": \"CHASUS33\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/employees",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees"]
+                }
+              }
+            },
+            {
+              "name": "Update Employee",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe Updated\",\n    \"phone\": \"+1234567899\",\n    \"designation_id\": 2\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/employees/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Employee",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employees/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees", "1"]
+                }
+              }
+            },
+            {
+              "name": "Export Employees",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employees/export?format=xlsx",
+                  "host": ["{{base_url}}"],
+                  "path": ["employees", "export"],
+                  "query": [
+                    {"key": "format", "value": "xlsx"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Awards",
+          "item": [
+            {
+              "name": "List Award Types",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/award-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["award-types"]
+                }
+              }
+            },
+            {
+              "name": "Create Award Type",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Employee of the Month\",\n    \"description\": \"Monthly recognition award\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/award-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["award-types"]
+                }
+              }
+            },
+            {
+              "name": "List Awards",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/awards?page=1&per_page=10&employee_id=&award_type_id=",
+                  "host": ["{{base_url}}"],
+                  "path": ["awards"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "employee_id", "value": ""},
+                    {"key": "award_type_id", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Award",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"award_type_id\": 1,\n    \"award_date\": \"2024-12-01\",\n    \"gift\": \"$500 Gift Card\",\n    \"monetary_value\": 500,\n    \"description\": \"Outstanding performance in Q4\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/awards",
+                  "host": ["{{base_url}}"],
+                  "path": ["awards"]
+                }
+              }
+            },
+            {
+              "name": "Update Award",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"description\": \"Updated description\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/awards/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["awards", "1"]
+                }
+              }
+            },
+            {
+              "name": "Delete Award",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/awards/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["awards", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Promotions",
+          "item": [
+            {
+              "name": "List Promotions",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/promotions?page=1&per_page=10&employee_id=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["promotions"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "employee_id", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Promotion",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"new_designation_id\": 2,\n    \"promotion_date\": \"2024-12-01\",\n    \"description\": \"Promoted for excellent performance\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/promotions",
+                  "host": ["{{base_url}}"],
+                  "path": ["promotions"]
+                }
+              }
+            },
+            {
+              "name": "Approve Promotion",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/promotions/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["promotions", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Reject Promotion",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rejection_reason\": \"Budget constraints\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/promotions/1/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["promotions", "1", "reject"]
+                }
+              }
+            },
+            {
+              "name": "Delete Promotion",
+              "request": {
+                "method": "DELETE",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/promotions/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["promotions", "1"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Resignations",
+          "item": [
+            {
+              "name": "List Resignations",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/resignations?page=1&per_page=10&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["resignations"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "10"},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Resignation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"resignation_date\": \"2024-12-01\",\n    \"last_working_day\": \"2024-12-31\",\n    \"reason\": \"Personal reasons\",\n    \"notice_period_days\": 30\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/resignations",
+                  "host": ["{{base_url}}"],
+                  "path": ["resignations"]
+                }
+              }
+            },
+            {
+              "name": "Approve Resignation",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/resignations/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["resignations", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Reject Resignation",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rejection_reason\": \"Counter offer accepted\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/resignations/1/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["resignations", "1", "reject"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Terminations",
+          "item": [
+            {
+              "name": "List Terminations",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/terminations",
+                  "host": ["{{base_url}}"],
+                  "path": ["terminations"]
+                }
+              }
+            },
+            {
+              "name": "Create Termination",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"termination_type\": \"involuntary\",\n    \"termination_date\": \"2024-12-15\",\n    \"reason\": \"Policy violation\",\n    \"notice_given\": true,\n    \"severance_package\": 5000\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/terminations",
+                  "host": ["{{base_url}}"],
+                  "path": ["terminations"]
+                }
+              }
+            },
+            {
+              "name": "Process Termination",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/terminations/1/process",
+                  "host": ["{{base_url}}"],
+                  "path": ["terminations", "1", "process"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Warnings",
+          "item": [
+            {
+              "name": "List Warnings",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/warnings",
+                  "host": ["{{base_url}}"],
+                  "path": ["warnings"]
+                }
+              }
+            },
+            {
+              "name": "Create Warning",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"warning_type\": \"written\",\n    \"warning_date\": \"2024-12-01\",\n    \"subject\": \"Late Attendance\",\n    \"description\": \"Multiple instances of late arrival\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/warnings",
+                  "host": ["{{base_url}}"],
+                  "path": ["warnings"]
+                }
+              }
+            },
+            {
+              "name": "Acknowledge Warning",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/warnings/1/acknowledge",
+                  "host": ["{{base_url}}"],
+                  "path": ["warnings", "1", "acknowledge"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Trips",
+          "item": [
+            {
+              "name": "List Trips",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/trips?status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["trips"],
+                  "query": [
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Trip",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"destination\": \"San Francisco, CA\",\n    \"start_date\": \"2024-12-15\",\n    \"end_date\": \"2024-12-18\",\n    \"purpose\": \"Client meeting\",\n    \"estimated_budget\": 2000\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/trips",
+                  "host": ["{{base_url}}"],
+                  "path": ["trips"]
+                }
+              }
+            },
+            {
+              "name": "Approve Trip",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/trips/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["trips", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Add Trip Expense",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"expense_type\": \"transportation\",\n    \"amount\": 350,\n    \"date\": \"2024-12-15\",\n    \"description\": \"Flight tickets\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/trips/1/expenses",
+                  "host": ["{{base_url}}"],
+                  "path": ["trips", "1", "expenses"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Complaints",
+          "item": [
+            {
+              "name": "List Complaints",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/complaints?status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["complaints"],
+                  "query": [
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Complaint",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"complaint_from_id\": 1,\n    \"complaint_against_id\": 2,\n    \"title\": \"Workplace harassment\",\n    \"date\": \"2024-12-01\",\n    \"description\": \"Detailed description of the complaint\",\n    \"is_anonymous\": false\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/complaints",
+                  "host": ["{{base_url}}"],
+                  "path": ["complaints"]
+                }
+              }
+            },
+            {
+              "name": "Assign Complaint",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"assigned_to_id\": 3\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/complaints/1/assign",
+                  "host": ["{{base_url}}"],
+                  "path": ["complaints", "1", "assign"]
+                }
+              }
+            },
+            {
+              "name": "Resolve Complaint",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"resolution\": \"Investigation completed. Action taken.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/complaints/1/resolve",
+                  "host": ["{{base_url}}"],
+                  "path": ["complaints", "1", "resolve"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Transfers",
+          "item": [
+            {
+              "name": "List Transfers",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/transfers",
+                  "host": ["{{base_url}}"],
+                  "path": ["transfers"]
+                }
+              }
+            },
+            {
+              "name": "Create Transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"to_branch_id\": 2,\n    \"to_department_id\": 3,\n    \"transfer_date\": \"2024-12-15\",\n    \"reason\": \"Business requirement\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/transfers",
+                  "host": ["{{base_url}}"],
+                  "path": ["transfers"]
+                }
+              }
+            },
+            {
+              "name": "Approve Transfer",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/transfers/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["transfers", "1", "approve"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Holidays",
+          "item": [
+            {
+              "name": "List Holidays",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/holidays?year=2024",
+                  "host": ["{{base_url}}"],
+                  "path": ["holidays"],
+                  "query": [
+                    {"key": "year", "value": "2024"}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Holiday",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Christmas Day\",\n    \"date\": \"2024-12-25\",\n    \"branch_ids\": [1, 2, 3],\n    \"description\": \"Christmas Holiday\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/holidays",
+                  "host": ["{{base_url}}"],
+                  "path": ["holidays"]
+                }
+              }
+            },
+            {
+              "name": "Get Holiday Calendar",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/holidays/calendar?year=2024",
+                  "host": ["{{base_url}}"],
+                  "path": ["holidays", "calendar"],
+                  "query": [
+                    {"key": "year", "value": "2024"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Announcements",
+          "item": [
+            {
+              "name": "List Announcements",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/announcements",
+                  "host": ["{{base_url}}"],
+                  "path": ["announcements"]
+                }
+              }
+            },
+            {
+              "name": "Create Announcement",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Company Update\",\n    \"category\": \"company_news\",\n    \"priority\": \"high\",\n    \"start_date\": \"2024-12-01\",\n    \"end_date\": \"2024-12-31\",\n    \"content\": \"<p>Important company update content here</p>\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/announcements",
+                  "host": ["{{base_url}}"],
+                  "path": ["announcements"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Assets",
+          "item": [
+            {
+              "name": "List Asset Types",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/asset-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["asset-types"]
+                }
+              }
+            },
+            {
+              "name": "Create Asset Type",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Laptop\",\n    \"description\": \"Company laptops\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/asset-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["asset-types"]
+                }
+              }
+            },
+            {
+              "name": "List Assets",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/assets?asset_type_id=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["assets"],
+                  "query": [
+                    {"key": "asset_type_id", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Asset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"MacBook Pro 16\",\n    \"asset_type_id\": 1,\n    \"serial_number\": \"C02XL0GTJGH5\",\n    \"purchase_date\": \"2024-01-15\",\n    \"purchase_cost\": 2499,\n    \"warranty_expiry\": \"2027-01-15\",\n    \"description\": \"16-inch MacBook Pro with M3 chip\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/assets",
+                  "host": ["{{base_url}}"],
+                  "path": ["assets"]
+                }
+              }
+            },
+            {
+              "name": "Assign Asset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"assignment_date\": \"2024-12-01\",\n    \"expected_return_date\": null,\n    \"notes\": \"Assigned for development work\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/assets/1/assign",
+                  "host": ["{{base_url}}"],
+                  "path": ["assets", "1", "assign"]
+                }
+              }
+            },
+            {
+              "name": "Unassign Asset",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/assets/1/unassign",
+                  "host": ["{{base_url}}"],
+                  "path": ["assets", "1", "unassign"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Training",
+          "item": [
+            {
+              "name": "List Training Types",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/training-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["training-types"]
+                }
+              }
+            },
+            {
+              "name": "List Training Programs",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/training-programs",
+                  "host": ["{{base_url}}"],
+                  "path": ["training-programs"]
+                }
+              }
+            },
+            {
+              "name": "Create Training Program",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Leadership Development\",\n    \"training_type_id\": 1,\n    \"description\": \"Leadership skills training\",\n    \"duration_hours\": 40,\n    \"cost\": 5000,\n    \"provider\": \"External Trainer\",\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/training-programs",
+                  "host": ["{{base_url}}"],
+                  "path": ["training-programs"]
+                }
+              }
+            },
+            {
+              "name": "List Training Sessions",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/training-sessions",
+                  "host": ["{{base_url}}"],
+                  "path": ["training-sessions"]
+                }
+              }
+            },
+            {
+              "name": "Enroll Employee in Training",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"training_session_id\": 1,\n    \"status\": \"enrolled\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/employee-trainings",
+                  "host": ["{{base_url}}"],
+                  "path": ["employee-trainings"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Recruitment",
+      "item": [
+        {
+          "name": "Job Categories",
+          "item": [
+            {
+              "name": "List Job Categories",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/job-categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["job-categories"]
+                }
+              }
+            },
+            {
+              "name": "Create Job Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Engineering\",\n    \"description\": \"Software engineering positions\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/job-categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["job-categories"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Postings",
+          "item": [
+            {
+              "name": "List Jobs",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/jobs?status=&job_type_id=&location_id=",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs"],
+                  "query": [
+                    {"key": "status", "value": ""},
+                    {"key": "job_type_id", "value": ""},
+                    {"key": "location_id", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Job",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/jobs/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Job",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Senior Software Engineer\",\n    \"job_category_id\": 1,\n    \"job_type_id\": 1,\n    \"job_location_id\": 1,\n    \"department_id\": 1,\n    \"salary_min\": 80000,\n    \"salary_max\": 120000,\n    \"experience_required\": \"5+ years\",\n    \"description\": \"<p>We are looking for a Senior Software Engineer...</p>\",\n    \"requirements\": \"<p>Requirements list...</p>\",\n    \"benefits\": \"<p>Benefits list...</p>\",\n    \"application_deadline\": \"2024-12-31\",\n    \"is_featured\": true,\n    \"status\": \"published\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/jobs",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs"]
+                }
+              }
+            },
+            {
+              "name": "Update Job",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Senior Software Engineer Updated\",\n    \"status\": \"published\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/jobs/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs", "1"]
+                }
+              }
+            },
+            {
+              "name": "Publish Job",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/jobs/1/publish",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs", "1", "publish"]
+                }
+              }
+            },
+            {
+              "name": "Close Job",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/jobs/1/close",
+                  "host": ["{{base_url}}"],
+                  "path": ["jobs", "1", "close"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Candidates",
+          "item": [
+            {
+              "name": "List Candidates",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/candidates?job_id=&status=&source_id=",
+                  "host": ["{{base_url}}"],
+                  "path": ["candidates"],
+                  "query": [
+                    {"key": "job_id", "value": ""},
+                    {"key": "status", "value": ""},
+                    {"key": "source_id", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Candidate",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/candidates/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["candidates", "1"]
+                }
+              }
+            },
+            {
+              "name": "Create Candidate",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Smith\",\n    \"email\": \"jane.smith@example.com\",\n    \"phone\": \"+1234567890\",\n    \"job_posting_id\": 1,\n    \"source_id\": 1,\n    \"experience_years\": 5,\n    \"current_salary\": 70000,\n    \"expected_salary\": 90000,\n    \"cover_letter\": \"I am excited to apply...\",\n    \"linkedin_profile\": \"https://linkedin.com/in/janesmith\",\n    \"status\": \"new\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/candidates",
+                  "host": ["{{base_url}}"],
+                  "path": ["candidates"]
+                }
+              }
+            },
+            {
+              "name": "Update Candidate Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"screening\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/candidates/1/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["candidates", "1", "status"]
+                }
+              }
+            },
+            {
+              "name": "Get Candidate Timeline",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/candidates/1/timeline",
+                  "host": ["{{base_url}}"],
+                  "path": ["candidates", "1", "timeline"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Interviews",
+          "item": [
+            {
+              "name": "List Interviews",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/interviews?candidate_id=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["interviews"],
+                  "query": [
+                    {"key": "candidate_id", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Schedule Interview",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"candidate_id\": 1,\n    \"interview_type_id\": 1,\n    \"interview_round_id\": 1,\n    \"date\": \"2024-12-15\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"11:00\",\n    \"location\": \"Conference Room A\",\n    \"meeting_link\": \"https://meet.google.com/abc-defg-hij\",\n    \"interviewer_ids\": [1, 2],\n    \"notes\": \"Technical interview\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/interviews",
+                  "host": ["{{base_url}}"],
+                  "path": ["interviews"]
+                }
+              }
+            },
+            {
+              "name": "Submit Interview Feedback",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"overall_rating\": 4,\n    \"technical_skills\": 5,\n    \"communication\": 4,\n    \"problem_solving\": 4,\n    \"cultural_fit\": 5,\n    \"strengths\": \"Strong technical background\",\n    \"weaknesses\": \"Could improve communication\",\n    \"recommendation\": \"hire\",\n    \"comments\": \"Great candidate overall\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/interviews/1/feedback",
+                  "host": ["{{base_url}}"],
+                  "path": ["interviews", "1", "feedback"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Offers",
+          "item": [
+            {
+              "name": "List Offers",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/offers?status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["offers"],
+                  "query": [
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Offer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"candidate_id\": 1,\n    \"job_title\": \"Senior Software Engineer\",\n    \"salary\": 100000,\n    \"start_date\": \"2025-01-15\",\n    \"expiry_date\": \"2024-12-31\",\n    \"benefits\": \"Health insurance, 401k, PTO\",\n    \"terms_conditions\": \"<p>Terms and conditions...</p>\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers",
+                  "host": ["{{base_url}}"],
+                  "path": ["offers"]
+                }
+              }
+            },
+            {
+              "name": "Send Offer",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/offers/1/send",
+                  "host": ["{{base_url}}"],
+                  "path": ["offers", "1", "send"]
+                }
+              }
+            },
+            {
+              "name": "Accept Offer",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/offers/1/accept",
+                  "host": ["{{base_url}}"],
+                  "path": ["offers", "1", "accept"]
+                }
+              }
+            },
+            {
+              "name": "Reject Offer",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rejection_reason\": \"Accepted another offer\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/1/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["offers", "1", "reject"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Leave Management",
+      "item": [
+        {
+          "name": "Leave Types",
+          "item": [
+            {
+              "name": "List Leave Types",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave-types"]
+                }
+              }
+            },
+            {
+              "name": "Create Leave Type",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Annual Leave\",\n    \"max_days_per_year\": 20,\n    \"leave_type\": \"paid\",\n    \"color\": \"#22c55e\",\n    \"description\": \"Annual paid leave\",\n    \"requires_approval\": true,\n    \"allow_half_day\": true,\n    \"allow_negative_balance\": false,\n    \"carry_forward\": true,\n    \"max_carry_forward_days\": 5,\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/leave-types",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave-types"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Leave Applications",
+          "item": [
+            {
+              "name": "List Leave Applications",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave?employee_id=&leave_type_id=&status=&start_date=&end_date=",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave"],
+                  "query": [
+                    {"key": "employee_id", "value": ""},
+                    {"key": "leave_type_id", "value": ""},
+                    {"key": "status", "value": ""},
+                    {"key": "start_date", "value": ""},
+                    {"key": "end_date", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Application",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave", "1"]
+                }
+              }
+            },
+            {
+              "name": "Apply for Leave",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"leave_type_id\": 1,\n    \"start_date\": \"2024-12-20\",\n    \"end_date\": \"2024-12-25\",\n    \"is_half_day\": false,\n    \"reason\": \"Family vacation\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/leave",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave"]
+                }
+              }
+            },
+            {
+              "name": "Approve Leave",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Reject Leave",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rejection_reason\": \"Team workload too high during this period\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/leave/1/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave", "1", "reject"]
+                }
+              }
+            },
+            {
+              "name": "Cancel Leave",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave/1/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave", "1", "cancel"]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Balances",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/leave/balances?employee_id=1&year=2024",
+                  "host": ["{{base_url}}"],
+                  "path": ["leave", "balances"],
+                  "query": [
+                    {"key": "employee_id", "value": "1"},
+                    {"key": "year", "value": "2024"}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Attendance Management",
+      "item": [
+        {
+          "name": "Shifts",
+          "item": [
+            {
+              "name": "List Shifts",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/shifts",
+                  "host": ["{{base_url}}"],
+                  "path": ["shifts"]
+                }
+              }
+            },
+            {
+              "name": "Create Shift",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Morning Shift\",\n    \"start_time\": \"09:00\",\n    \"end_time\": \"18:00\",\n    \"break_duration_minutes\": 60,\n    \"grace_period_minutes\": 15,\n    \"shift_type\": \"day\",\n    \"working_days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/shifts",
+                  "host": ["{{base_url}}"],
+                  "path": ["shifts"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Attendance Records",
+          "item": [
+            {
+              "name": "List Attendance",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance?employee_id=&date=&status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance"],
+                  "query": [
+                    {"key": "employee_id", "value": ""},
+                    {"key": "date", "value": ""},
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Today's Status",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/today",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "today"]
+                }
+              }
+            },
+            {
+              "name": "Clock In",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/clock-in",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "clock-in"]
+                }
+              }
+            },
+            {
+              "name": "Clock Out",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/clock-out",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "clock-out"]
+                }
+              }
+            },
+            {
+              "name": "Create Manual Entry",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"date\": \"2024-12-01\",\n    \"clock_in_time\": \"09:00\",\n    \"clock_out_time\": \"18:00\",\n    \"status\": \"present\",\n    \"notes\": \"Manual entry for missed punch\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/attendance",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance"]
+                }
+              }
+            },
+            {
+              "name": "Get Attendance Report",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/report?employee_id=&start_date=2024-12-01&end_date=2024-12-31",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "report"],
+                  "query": [
+                    {"key": "employee_id", "value": ""},
+                    {"key": "start_date", "value": "2024-12-01"},
+                    {"key": "end_date", "value": "2024-12-31"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Regularizations",
+          "item": [
+            {
+              "name": "List Regularizations",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/regularizations?status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "regularizations"],
+                  "query": [
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Request Regularization",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"date\": \"2024-12-01\",\n    \"requested_clock_in\": \"09:00\",\n    \"requested_clock_out\": \"18:00\",\n    \"reason\": \"Forgot to clock in\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/attendance/regularizations",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "regularizations"]
+                }
+              }
+            },
+            {
+              "name": "Approve Regularization",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/attendance/regularizations/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "regularizations", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Reject Regularization",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rejection_reason\": \"Insufficient justification\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/attendance/regularizations/1/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["attendance", "regularizations", "1", "reject"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payroll Management",
+      "item": [
+        {
+          "name": "Salary Components",
+          "item": [
+            {
+              "name": "List Salary Components",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/salary-components",
+                  "host": ["{{base_url}}"],
+                  "path": ["salary-components"]
+                }
+              }
+            },
+            {
+              "name": "Create Salary Component",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Basic Salary\",\n    \"component_type\": \"earning\",\n    \"calculation_type\": \"fixed\",\n    \"is_taxable\": true,\n    \"is_mandatory\": true,\n    \"description\": \"Base salary component\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/salary-components",
+                  "host": ["{{base_url}}"],
+                  "path": ["salary-components"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Employee Salaries",
+          "item": [
+            {
+              "name": "List Employee Salaries",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/employee-salaries",
+                  "host": ["{{base_url}}"],
+                  "path": ["employee-salaries"]
+                }
+              }
+            },
+            {
+              "name": "Create Employee Salary",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"employee_id\": 1,\n    \"base_salary\": 60000,\n    \"effective_date\": \"2024-01-01\",\n    \"components\": [\n        {\"salary_component_id\": 1, \"amount\": 60000},\n        {\"salary_component_id\": 2, \"amount\": 12000},\n        {\"salary_component_id\": 3, \"amount\": 5000}\n    ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/employee-salaries",
+                  "host": ["{{base_url}}"],
+                  "path": ["employee-salaries"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Payroll Runs",
+          "item": [
+            {
+              "name": "List Payroll Runs",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payroll-runs?status=",
+                  "host": ["{{base_url}}"],
+                  "path": ["payroll-runs"],
+                  "query": [
+                    {"key": "status", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Payroll Run",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Accept", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"pay_period_start\": \"2024-12-01\",\n    \"pay_period_end\": \"2024-12-31\",\n    \"payment_date\": \"2025-01-05\",\n    \"include_employees\": \"all\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/payroll-runs",
+                  "host": ["{{base_url}}"],
+                  "path": ["payroll-runs"]
+                }
+              }
+            },
+            {
+              "name": "Process Payroll",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payroll-runs/1/process",
+                  "host": ["{{base_url}}"],
+                  "path": ["payroll-runs", "1", "process"]
+                }
+              }
+            },
+            {
+              "name": "Approve Payroll",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payroll-runs/1/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["payroll-runs", "1", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Mark Payroll as Paid",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payroll-runs/1/mark-paid",
+                  "host": ["{{base_url}}"],
+                  "path": ["payroll-runs", "1", "mark-paid"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Payslips",
+          "item": [
+            {
+              "name": "List Payslips",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payslips?employee_id=&payroll_run_id=",
+                  "host": ["{{base_url}}"],
+                  "path": ["payslips"],
+                  "query": [
+                    {"key": "employee_id", "value": ""},
+                    {"key": "payroll_run_id", "value": ""}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Payslip",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payslips/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["payslips", "1"]
+                }
+              }
+            },
+            {
+              "name": "Download Payslip PDF",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/pdf"}],
+                "url": {
+                  "raw": "{{base_url}}/payslips/1/download",
+                  "host": ["{{base_url}}"],
+                  "path": ["payslips", "1", "download"]
+                }
+              }
+            },
+            {
+              "name": "Send Payslip Email",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payslips/1/send",
+                  "host": ["{{base_url}}"],
+                  "path": ["payslips", "1", "send"]
+                }
+              }
+            },
+            {
+              "name": "Get My Payslips",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Accept", "value": "application/json"}],
+                "url": {
+                  "raw": "{{base_url}}/payslips/my?year=2024",
+                  "host": ["{{base_url}}"],
+                  "path": ["payslips", "my"],
+                  "query": [
+                    {"key": "year", "value": "2024"}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Contracts",
+      "item": [
+        {
+          "name": "List Contract Types",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/contract-types",
+              "host": ["{{base_url}}"],
+              "path": ["contract-types"]
+            }
+          }
+        },
+        {
+          "name": "List Contracts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/contracts?employee_id=&status=",
+              "host": ["{{base_url}}"],
+              "path": ["contracts"],
+              "query": [
+                {"key": "employee_id", "value": ""},
+                {"key": "status", "value": ""}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Contract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"employee_id\": 1,\n    \"contract_type_id\": 1,\n    \"contract_number\": \"CNT-2024-001\",\n    \"start_date\": \"2024-01-01\",\n    \"end_date\": \"2024-12-31\",\n    \"salary\": 60000,\n    \"working_hours_per_week\": 40,\n    \"probation_period_days\": 90,\n    \"notice_period_days\": 30,\n    \"terms_conditions\": \"<p>Contract terms...</p>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts",
+              "host": ["{{base_url}}"],
+              "path": ["contracts"]
+            }
+          }
+        },
+        {
+          "name": "Terminate Contract",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"termination_date\": \"2024-12-15\",\n    \"reason\": \"Mutual agreement\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contracts/1/terminate",
+              "host": ["{{base_url}}"],
+              "path": ["contracts", "1", "terminate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "List Document Categories",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/document-categories",
+              "host": ["{{base_url}}"],
+              "path": ["document-categories"]
+            }
+          }
+        },
+        {
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/documents?category_id=",
+              "host": ["{{base_url}}"],
+              "path": ["documents"],
+              "query": [
+                {"key": "category_id", "value": ""}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "name", "value": "Employee Handbook", "type": "text"},
+                {"key": "category_id", "value": "1", "type": "text"},
+                {"key": "description", "value": "Company employee handbook", "type": "text"},
+                {"key": "file", "type": "file", "src": ""},
+                {"key": "requires_acknowledgment", "value": "true", "type": "text"}
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/documents",
+              "host": ["{{base_url}}"],
+              "path": ["documents"]
+            }
+          }
+        },
+        {
+          "name": "Download Document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/1/download",
+              "host": ["{{base_url}}"],
+              "path": ["documents", "1", "download"]
+            }
+          }
+        },
+        {
+          "name": "Acknowledge Document",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/documents/1/acknowledge",
+              "host": ["{{base_url}}"],
+              "path": ["documents", "1", "acknowledge"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Meetings",
+      "item": [
+        {
+          "name": "List Meeting Types",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/meeting-types",
+              "host": ["{{base_url}}"],
+              "path": ["meeting-types"]
+            }
+          }
+        },
+        {
+          "name": "List Meeting Rooms",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/meeting-rooms",
+              "host": ["{{base_url}}"],
+              "path": ["meeting-rooms"]
+            }
+          }
+        },
+        {
+          "name": "List Meetings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/meetings?status=&date=",
+              "host": ["{{base_url}}"],
+              "path": ["meetings"],
+              "query": [
+                {"key": "status", "value": ""},
+                {"key": "date", "value": ""}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Schedule Meeting",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Weekly Team Standup\",\n    \"meeting_type_id\": 1,\n    \"date\": \"2024-12-15\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"10:30\",\n    \"meeting_room_id\": 1,\n    \"attendee_ids\": [1, 2, 3],\n    \"agenda\": \"<p>Weekly progress update</p>\",\n    \"send_invitations\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/meetings",
+              "host": ["{{base_url}}"],
+              "path": ["meetings"]
+            }
+          }
+        },
+        {
+          "name": "Record Meeting Minutes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"<p>Meeting minutes content...</p>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/meetings/1/minutes",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1", "minutes"]
+            }
+          }
+        },
+        {
+          "name": "Create Action Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Follow up with client\",\n    \"description\": \"Send proposal to client\",\n    \"assigned_to_id\": 1,\n    \"due_date\": \"2024-12-20\",\n    \"priority\": \"high\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/meetings/1/action-items",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1", "action-items"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "item": [
+        {
+          "name": "Get Calendar Events",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/calendar?start=2024-12-01&end=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["calendar"],
+              "query": [
+                {"key": "start", "value": "2024-12-01"},
+                {"key": "end", "value": "2024-12-31"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get All Settings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": ["{{base_url}}"],
+              "path": ["settings"]
+            }
+          }
+        },
+        {
+          "name": "Get Settings by Group",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/settings/general",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "general"]
+            }
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"company_name\": \"My Company\",\n    \"company_email\": \"info@mycompany.com\",\n    \"timezone\": \"America/New_York\",\n    \"date_format\": \"MM/DD/YYYY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/settings/general",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "general"]
+            }
+          }
+        },
+        {
+          "name": "Test Email Configuration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"test_email\": \"test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/settings/test-email",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "test-email"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media Library",
+      "item": [
+        {
+          "name": "List Directories",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/media/directories",
+              "host": ["{{base_url}}"],
+              "path": ["media", "directories"]
+            }
+          }
+        },
+        {
+          "name": "Create Directory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Documents\",\n    \"parent_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/media/directories",
+              "host": ["{{base_url}}"],
+              "path": ["media", "directories"]
+            }
+          }
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/media/files?directory_id=",
+              "host": ["{{base_url}}"],
+              "path": ["media", "files"],
+              "query": [
+                {"key": "directory_id", "value": ""}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Files",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "files[]", "type": "file", "src": ""},
+                {"key": "directory_id", "value": "1", "type": "text"}
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/media/files",
+              "host": ["{{base_url}}"],
+              "path": ["media", "files"]
+            }
+          }
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/media/files/1/download",
+              "host": ["{{base_url}}"],
+              "path": ["media", "files", "1", "download"]
+            }
+          }
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/media/files/1",
+              "host": ["{{base_url}}"],
+              "path": ["media", "files", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

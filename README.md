@@ -114,9 +114,12 @@ The API is available at: `http://localhost:8000/api`
 
 | Document | Description |
 |----------|-------------|
-| [API Documentation](docs/API_DOCUMENTATION.md) | Complete API reference |
-| [Frontend Guide](docs/FRONTEND_GUIDE.md) | React/Vue integration examples |
-| [Setup Guide](docs/SETUP_GUIDE.md) | Installation & deployment |
+| [API Documentation](hrms/docs/API_DOCUMENTATION.md) | Core API reference |
+| [Complete API Reference](COMPLETE_API_REFERENCE.md) | Full 444-endpoint documentation |
+| [Feature Comparison](FEATURE_COMPARISON.md) | WorkDo HRM comparison matrix |
+| [Implementation Report](IMPLEMENTATION_COMPLETE.md) | Backend completion summary |
+| [Reference Guide](hrm-guide/README.md) | Devin's exploration docs |
+| [Postman Collection](hrms/postman/HRMS_API.postman_collection.json) | API testing collection |
 
 ---
 
@@ -187,16 +190,70 @@ php artisan test --filter=LeaveManagementTest
 php artisan test --coverage
 ```
 
+### 🎯 Recruitment (ATS)
+
+- Job categories and stages
+- Job postings with custom questions
+- Candidate management
+- Job applications pipeline
+- Interview scheduling and feedback
+- Convert candidates to employees
+
+### 📋 Onboarding
+
+- Onboarding templates
+- Task checklists
+- Employee onboarding tracking
+- Progress monitoring
+
+### 📝 Contract Management
+
+- Contract types
+- Employee contracts
+- Contract renewals
+- Expiring contracts alerts
+
+### 🤝 Meeting Management
+
+- Meeting types and rooms
+- Meeting scheduling
+- Attendee management
+- Minutes and action items
+- Calendar integration
+
+### ⏱️ Shifts & Timesheets
+
+- Shift definitions
+- Shift assignments
+- Roster management
+- Timesheet projects
+- Time entry tracking
+- Approval workflow
+
+### 🏠 Asset Management
+
+- Asset types with depreciation
+- Asset inventory
+- Asset assignments
+- Return tracking
+
+### 📚 Training Management
+
+- Training types and programs
+- Session scheduling
+- Employee enrollment
+- Completion tracking
+
 ---
 
 ## 📊 API Statistics
 
 | Metric | Count |
 |--------|-------|
-| Total Routes | 288 |
-| Controllers | 50+ |
-| Models | 50+ |
-| Migrations | 45+ |
+| **Total Routes** | 444 |
+| **Controllers** | 73 |
+| **Models** | 81 |
+| **Migrations** | 59 |
 
 ---
 

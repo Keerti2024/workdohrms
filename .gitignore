@@ -1,6 +1,10 @@
 # Demo folder - reference only, not part of project
 demo/
 
+# Frontend folder - separate development
+frontend/
+
+
 # Composer phar file
 composer.phar
 
