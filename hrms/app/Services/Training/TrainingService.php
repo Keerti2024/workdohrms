@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Services\Training;
-use App\Services\Core\BaseService;
 
 use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
 use App\Models\TrainingType;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

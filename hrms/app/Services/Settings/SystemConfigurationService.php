@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Settings;
-use App\Services\Core\BaseService;
 
 use App\Models\AllowedIpAddress;
 use App\Models\SystemConfiguration;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 
 /**

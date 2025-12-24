@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Organization;
-use App\Services\Core\BaseService;
 
 use App\Models\Division;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Attendance;
-use App\Services\Core\BaseService;
 
 use App\Models\AttendanceRegularization;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

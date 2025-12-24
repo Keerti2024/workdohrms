@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Documents;
-use App\Services\Core\BaseService;
 
 use App\Models\GeneratedLetter;
 use App\Models\LetterTemplate;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

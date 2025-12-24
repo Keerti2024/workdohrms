@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Company;
-use App\Services\Core\BaseService;
 
 use App\Models\MeetingRoom;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

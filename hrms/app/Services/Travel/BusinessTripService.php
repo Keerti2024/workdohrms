@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Travel;
-use App\Services\Core\BaseService;
 
 use App\Models\BusinessTrip;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

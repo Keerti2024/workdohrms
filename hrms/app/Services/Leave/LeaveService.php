@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Leave;
-use App\Services\Core\BaseService;
 
 use App\Models\TimeOffCategory;
 use App\Models\TimeOffRequest;
+use App\Services\Core\BaseService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +31,7 @@ class LeaveService extends BaseService
     protected array $filterableFields = [
         'staff_member_id' => 'staff_member_id',
         'time_off_category_id' => 'category_id',
-        'status' => 'status',
+        'status' => 'approval_status',
     ];
 
     /**
@@ -82,7 +82,7 @@ class LeaveService extends BaseService
             $endDate = Carbon::parse($data['end_date']);
             $data['total_days'] = $startDate->diffInDays($endDate) + 1;
 
-            $data['status'] = 'pending';
+            $data['approval_status'] = 'pending';
 
             return TimeOffRequest::create($data);
         });
@@ -99,10 +99,10 @@ class LeaveService extends BaseService
 
         return DB::transaction(function () use ($request, $approverId, $notes) {
             $request->update([
-                'status' => 'approved',
+                'approval_status' => 'approved',
                 'approved_by' => $approverId,
                 'approved_at' => now(),
-                'approval_notes' => $notes,
+                'approval_remarks' => $notes,
             ]);
 
             // Deduct leave balance if tracking is enabled
@@ -122,10 +122,10 @@ class LeaveService extends BaseService
         }
 
         $request->update([
-            'status' => 'rejected',
+            'approval_status' => 'declined',
             'approved_by' => $approverId,
             'approved_at' => now(),
-            'rejection_reason' => $reason,
+            'approval_remarks' => $reason,
         ]);
 
         return $request->fresh($this->defaultRelations);
@@ -141,11 +141,11 @@ class LeaveService extends BaseService
         }
 
         // Restore balance if it was deducted
-        if ($request->status === 'approved') {
+        if ($request->approval_status === 'approved') {
             $this->restoreLeaveBalance($request);
         }
 
-        $request->update(['status' => 'cancelled']);
+        $request->update(['approval_status' => 'declined']);
 
         return $request->fresh($this->defaultRelations);
     }
@@ -183,7 +183,7 @@ class LeaveService extends BaseService
         foreach ($categories as $category) {
             $used = TimeOffRequest::where('staff_member_id', $staffMemberId)
                 ->where('time_off_category_id', $category->id)
-                ->where('status', 'approved')
+                ->where('approval_status', 'approved')
                 ->whereYear('start_date', $year)
                 ->sum('total_days');
 
@@ -212,10 +212,9 @@ class LeaveService extends BaseService
 
         return [
             'total' => (clone $query)->count(),
-            'pending' => (clone $query)->where('status', 'pending')->count(),
-            'approved' => (clone $query)->where('status', 'approved')->count(),
-            'rejected' => (clone $query)->where('status', 'rejected')->count(),
-            'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
+            'pending' => (clone $query)->where('approval_status', 'pending')->count(),
+            'approved' => (clone $query)->where('approval_status', 'approved')->count(),
+            'declined' => (clone $query)->where('approval_status', 'declined')->count(),
         ];
     }
 
@@ -227,7 +226,7 @@ class LeaveService extends BaseService
         $date = $date ?? now()->toDateString();
 
         return TimeOffRequest::with('staffMember', 'category')
-            ->where('status', 'approved')
+            ->where('approval_status', 'approved')
             ->where('start_date', '<=', $date)
             ->where('end_date', '>=', $date)
             ->get();
@@ -239,7 +238,7 @@ class LeaveService extends BaseService
     public function hasOverlappingRequest(int $staffMemberId, string $startDate, string $endDate, ?int $excludeId = null): bool
     {
         $query = TimeOffRequest::where('staff_member_id', $staffMemberId)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('approval_status', ['pending', 'approved'])
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
                     ->orWhereBetween('end_date', [$startDate, $endDate])

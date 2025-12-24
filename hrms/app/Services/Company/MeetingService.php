@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Services\Company;
-use App\Services\Core\BaseService;
 
 use App\Models\Meeting;
 use App\Models\MeetingActionItem;
 use App\Models\MeetingAttendee;
 use App\Models\MeetingMinutes;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

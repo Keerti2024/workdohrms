@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Documents;
-use App\Services\Core\BaseService;
 
 use App\Models\DocumentType;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

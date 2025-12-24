@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Payroll;
-use App\Services\Core\BaseService;
 
 use App\Models\BonusPayment;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

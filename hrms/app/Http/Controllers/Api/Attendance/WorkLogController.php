@@ -60,7 +60,7 @@ class WorkLogController extends Controller
         try {
             $validated = $request->validate([
                 'staff_member_id' => 'required|exists:staff_members,id',
-                'work_date' => 'required|date',
+                'log_date' => 'required|date',
                 'clock_in' => 'nullable|date_format:H:i',
                 'clock_out' => 'nullable|date_format:H:i|after:clock_in',
                 'status' => 'nullable|in:present,absent,late,half_day,leave',
@@ -257,7 +257,7 @@ class WorkLogController extends Controller
             $validated = $request->validate([
                 'records' => 'required|array|min:1',
                 'records.*.staff_member_id' => 'required|exists:staff_members,id',
-                'records.*.work_date' => 'required|date',
+                'records.*.log_date' => 'required|date',
                 'records.*.status' => 'required|in:present,absent,late,half_day,leave',
             ]);
 

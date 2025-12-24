@@ -67,6 +67,11 @@ class TimeOffRequest extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');

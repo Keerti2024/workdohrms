@@ -75,15 +75,13 @@ class DashboardService
      */
     public function getPayrollStats(): array
     {
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
+        $currentPeriod = now()->format('Y-m');
 
-        $monthlySlips = SalarySlip::where('salary_month', $currentMonth)
-            ->where('salary_year', $currentYear)
+        $monthlySlips = SalarySlip::where('salary_period', $currentPeriod)
             ->get();
 
         return [
-            'total_salary' => $monthlySlips->sum('net_salary'),
+            'total_salary' => $monthlySlips->sum('net_payable'),
             'processed' => $monthlySlips->where('status', 'paid')->count(),
             'pending' => $monthlySlips->where('status', 'generated')->count(),
         ];
@@ -175,7 +173,7 @@ class DashboardService
 
         // Recent attendance
         $attendance = WorkLog::with('staffMember')
-            ->whereDate('work_date', now())
+            ->whereDate('log_date', now())
             ->latest()
             ->limit($limit)
             ->get();
@@ -226,7 +224,7 @@ class DashboardService
      */
     public function getRecentAnnouncements(int $limit = 5): array
     {
-        $notices = CompanyNotice::where('is_active', true)
+        $notices = CompanyNotice::active()
             ->latest()
             ->limit($limit)
             ->get()

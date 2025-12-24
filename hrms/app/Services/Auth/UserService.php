@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Auth;
-use App\Services\Core\BaseService;
 
 use App\Models\User;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

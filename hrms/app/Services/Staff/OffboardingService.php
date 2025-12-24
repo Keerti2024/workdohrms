@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Services\Staff;
-use App\Services\Core\BaseService;
 
 use App\Models\OffboardingChecklist;
 use App\Models\OffboardingProgress;
 use App\Models\OffboardingTask;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

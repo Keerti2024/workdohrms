@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Services\Payroll;
-use App\Services\Core\BaseService;
 
 use App\Models\AdvanceType;
 use App\Models\CompensationCategory;
 use App\Models\EmployerContribution;
 use App\Models\WithholdingType;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

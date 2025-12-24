@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Services\Payroll;
-use App\Services\Core\BaseService;
 
 use App\Models\MinimumTaxLimit;
 use App\Models\TaxExemption;
 use App\Models\TaxSlab;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

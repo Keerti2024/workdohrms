@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Recruitment;
-use App\Services\Core\BaseService;
 
 use App\Models\CustomQuestion;
 use App\Models\Job;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

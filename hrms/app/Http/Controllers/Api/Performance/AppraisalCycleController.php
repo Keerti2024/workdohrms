@@ -30,8 +30,8 @@ class AppraisalCycleController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'cycle_start' => 'required|date',
-            'cycle_end' => 'required|date|after:cycle_start',
-            'review_deadline' => 'nullable|date|after:cycle_start',
+            'cycle_end' => 'required|date|after_or_equal:cycle_start',
+            'review_deadline' => 'nullable|date|after_or_equal:cycle_start',
             'notes' => 'nullable|string',
         ]);
 

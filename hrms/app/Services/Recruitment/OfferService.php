@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Recruitment;
-use App\Services\Core\BaseService;
 
 use App\Models\Offer;
 use App\Models\OfferTemplate;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

@@ -136,7 +136,7 @@ class DemoDataSeeder extends Seeder
                 ]
             );
 
-            if (!$user->hasRole($userData['role'])) {
+            if (! $user->hasRole($userData['role'])) {
                 $user->assignRole($userData['role']);
             }
 
@@ -173,14 +173,14 @@ class DemoDataSeeder extends Seeder
                     'password' => Hash::make('password'),
                 ]
             );
-            if (!$user->hasRole('staff_member')) {
+            if (! $user->hasRole('staff_member')) {
                 $user->assignRole('staff_member');
             }
 
             StaffMember::firstOrCreate(
                 ['user_id' => $user->id],
                 array_merge($sd, [
-                    'staff_code' => 'EMP' . str_pad($index + 5, 3, '0', STR_PAD_LEFT),
+                    'staff_code' => 'EMP'.str_pad($index + 5, 3, '0', STR_PAD_LEFT),
                     'office_location_id' => $headOffice->id,
                     'division_id' => $engineering->id,
                     'job_title_id' => $jobTitleModels[$index % count($jobTitleModels)]->id,

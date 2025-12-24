@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Recruitment;
-use App\Services\Core\BaseService;
 
 use App\Models\JobTitle;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

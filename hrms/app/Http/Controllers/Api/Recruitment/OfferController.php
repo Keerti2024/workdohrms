@@ -164,7 +164,7 @@ class OfferController extends Controller
         ]);
 
         // Update candidate status
-        $offer->candidate->update(['status' => 'offer']);
+        $offer->candidate->update(['status' => 'offered']);
 
         // TODO: Send email notification to candidate
 
