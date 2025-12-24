@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Attendance;
-use App\Services\Core\BaseService;
 
 use App\Models\StaffMember;
 use App\Models\WorkLog;
+use App\Services\Core\BaseService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -38,24 +38,24 @@ class AttendanceService extends BaseService
 
         // Date filter
         if (! empty($params['date'])) {
-            $query->whereDate('work_date', $params['date']);
+            $query->whereDate('log_date', $params['date']);
         }
 
         // Date range filter
         if (! empty($params['start_date'])) {
-            $query->whereDate('work_date', '>=', $params['start_date']);
+            $query->whereDate('log_date', '>=', $params['start_date']);
         }
         if (! empty($params['end_date'])) {
-            $query->whereDate('work_date', '<=', $params['end_date']);
+            $query->whereDate('log_date', '<=', $params['end_date']);
         }
 
         // Month/Year filter
         if (! empty($params['month']) && ! empty($params['year'])) {
-            $query->whereMonth('work_date', $params['month'])
-                ->whereYear('work_date', $params['year']);
+            $query->whereMonth('log_date', $params['month'])
+                ->whereYear('log_date', $params['year']);
         }
 
-        $query = $this->applyOrdering($query, ['order_by' => 'work_date', 'order' => 'desc']);
+        $query = $this->applyOrdering($query, ['order_by' => 'log_date', 'order' => 'desc']);
 
         $paginate = $params['paginate'] ?? true;
         $perPage = $params['per_page'] ?? $this->perPage;
@@ -74,7 +74,7 @@ class AttendanceService extends BaseService
 
         // Check if already clocked in today
         $existing = WorkLog::where('staff_member_id', $staffMemberId)
-            ->whereDate('work_date', $today)
+            ->whereDate('log_date', $today)
             ->first();
 
         if ($existing) {
@@ -83,10 +83,9 @@ class AttendanceService extends BaseService
 
         return WorkLog::create([
             'staff_member_id' => $staffMemberId,
-            'work_date' => $today,
+            'log_date' => $today,
             'clock_in' => now(),
             'clock_in_ip' => $data['ip_address'] ?? null,
-            'clock_in_location' => $data['location'] ?? null,
             'status' => 'present',
         ]);
     }
@@ -99,7 +98,7 @@ class AttendanceService extends BaseService
         $today = now()->toDateString();
 
         $workLog = WorkLog::where('staff_member_id', $staffMemberId)
-            ->whereDate('work_date', $today)
+            ->whereDate('log_date', $today)
             ->whereNull('clock_out')
             ->first();
 
@@ -127,8 +126,9 @@ class AttendanceService extends BaseService
     public function recordAttendance(array $data): WorkLog
     {
         return DB::transaction(function () use ($data) {
+            $logDate = $data['log_date'] ?? $data['work_date'] ?? now()->toDateString();
             $existing = WorkLog::where('staff_member_id', $data['staff_member_id'])
-                ->whereDate('work_date', $data['work_date'])
+                ->whereDate('log_date', $logDate)
                 ->first();
 
             if ($existing) {
@@ -165,12 +165,12 @@ class AttendanceService extends BaseService
         $today = now()->toDateString();
         $totalEmployees = StaffMember::active()->count();
 
-        $present = WorkLog::whereDate('work_date', $today)->count();
+        $present = WorkLog::whereDate('log_date', $today)->count();
         $absent = $totalEmployees - $present;
-        $late = WorkLog::whereDate('work_date', $today)
+        $late = WorkLog::whereDate('log_date', $today)
             ->where('status', 'late')
             ->count();
-        $halfDay = WorkLog::whereDate('work_date', $today)
+        $halfDay = WorkLog::whereDate('log_date', $today)
             ->where('status', 'half_day')
             ->count();
 
@@ -193,7 +193,7 @@ class AttendanceService extends BaseService
      */
     public function getSummaryForDateRange(string $startDate, string $endDate, ?int $staffMemberId = null): array
     {
-        $query = WorkLog::whereBetween('work_date', [$startDate, $endDate]);
+        $query = WorkLog::whereBetween('log_date', [$startDate, $endDate]);
 
         if ($staffMemberId) {
             $query->where('staff_member_id', $staffMemberId);
@@ -221,9 +221,9 @@ class AttendanceService extends BaseService
     public function getEmployeeMonthlyAttendance(int $staffMemberId, int $month, int $year): array
     {
         $records = WorkLog::where('staff_member_id', $staffMemberId)
-            ->whereMonth('work_date', $month)
-            ->whereYear('work_date', $year)
-            ->orderBy('work_date')
+            ->whereMonth('log_date', $month)
+            ->whereYear('log_date', $year)
+            ->orderBy('log_date')
             ->get();
 
         $startOfMonth = Carbon::create($year, $month, 1);
@@ -272,10 +272,10 @@ class AttendanceService extends BaseService
     /**
      * Check if employee has clocked in today.
      */
-    public function hasClonedInToday(int $staffMemberId): bool
+    public function hasClockedInToday(int $staffMemberId): bool
     {
         return WorkLog::where('staff_member_id', $staffMemberId)
-            ->whereDate('work_date', now()->toDateString())
+            ->whereDate('log_date', now()->toDateString())
             ->exists();
     }
 
@@ -285,7 +285,7 @@ class AttendanceService extends BaseService
     public function getCurrentStatus(int $staffMemberId): ?array
     {
         $workLog = WorkLog::where('staff_member_id', $staffMemberId)
-            ->whereDate('work_date', now()->toDateString())
+            ->whereDate('log_date', now()->toDateString())
             ->first();
 
         if (! $workLog) {

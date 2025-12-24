@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Staff;
-use App\Services\Core\BaseService;
 
 use App\Models\Contract;
 use App\Models\ContractType;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

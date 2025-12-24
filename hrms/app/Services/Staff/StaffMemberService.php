@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Staff;
-use App\Services\Core\BaseService;
 
 use App\Models\StaffMember;
 use App\Models\User;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

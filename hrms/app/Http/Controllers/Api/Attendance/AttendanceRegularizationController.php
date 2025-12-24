@@ -9,7 +9,6 @@ use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-
 class AttendanceRegularizationController extends Controller
 {
     public function index(Request $request)
@@ -56,7 +55,7 @@ class AttendanceRegularizationController extends Controller
         // Use provided staff_member_id or fall back to logged-in user's staff member
         $staffMemberId = $request->staff_member_id ?? auth()->user()->staffMember?->id;
 
-        if (!$staffMemberId) {
+        if (! $staffMemberId) {
             return response()->json([
                 'success' => false,
                 'message' => 'Staff member not found. Please provide staff_member_id or login as a staff member.',

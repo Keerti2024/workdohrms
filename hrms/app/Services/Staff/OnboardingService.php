@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Services\Staff;
-use App\Services\Core\BaseService;
 
 use App\Models\OnboardingChecklist;
 use App\Models\OnboardingProgress;
 use App\Models\OnboardingTask;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Assets;
-use App\Services\Core\BaseService;
 
 use App\Models\AssetType;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

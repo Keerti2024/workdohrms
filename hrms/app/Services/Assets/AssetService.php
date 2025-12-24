@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Assets;
-use App\Services\Core\BaseService;
 
 use App\Models\Asset;
 use App\Models\AssetAssignment;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

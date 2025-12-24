@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Services\Recruitment;
-use App\Services\Core\BaseService;
 
 use App\Models\Candidate;
 use App\Models\StaffMember;
 use App\Models\User;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Staff;
-use App\Services\Core\BaseService;
 
 use App\Models\ExitCategory;
 use App\Models\VoluntaryExit;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

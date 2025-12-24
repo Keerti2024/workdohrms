@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Payroll;
-use App\Services\Core\BaseService;
 
 use App\Models\SalaryAdvance;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

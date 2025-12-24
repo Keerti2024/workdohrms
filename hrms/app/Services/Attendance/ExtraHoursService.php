@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Services\Attendance;
-use App\Services\Core\BaseService;
 
 use App\Models\ExtraHoursRecord;
+use App\Services\Core\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -36,7 +36,8 @@ class ExtraHoursService extends BaseService
         $query = $this->applyFilters($query, $params);
 
         if (! empty($params['start_date']) && ! empty($params['end_date'])) {
-            $query->whereBetween('work_date', [$params['start_date'], $params['end_date']]);
+            $query->where('period_start', '>=', $params['start_date'])
+                ->where('period_end', '<=', $params['end_date']);
         }
 
         $query = $this->applyOrdering($query, $params);
@@ -129,7 +130,7 @@ class ExtraHoursService extends BaseService
         return $this->query()
             ->with($this->defaultRelations)
             ->where('staff_member_id', $staffMemberId)
-            ->orderBy('work_date', 'desc')
+            ->orderBy('period_start', 'desc')
             ->get();
     }
 
@@ -140,8 +141,9 @@ class ExtraHoursService extends BaseService
     {
         return $this->query()
             ->where('staff_member_id', $staffMemberId)
-            ->where('status', 'approved')
-            ->whereBetween('work_date', [$startDate, $endDate])
-            ->sum('hours');
+            ->where('period_start', '>=', $startDate)
+            ->where('period_end', '<=', $endDate)
+            ->selectRaw('SUM(days_count * hours_per_day) as total_hours')
+            ->value('total_hours') ?? 0;
     }
 }

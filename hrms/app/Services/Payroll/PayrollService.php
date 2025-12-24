@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Services\Payroll;
-use App\Services\Core\BaseService;
 
 use App\Models\RecurringDeduction;
 use App\Models\SalarySlip;
 use App\Models\StaffBenefit;
 use App\Models\StaffMember;
+use App\Services\Core\BaseService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -39,10 +39,15 @@ class PayrollService extends BaseService
 
         $query = $this->applyFilters($query, $params);
 
-        // Month/Year filter
+        // Month/Year filter - salary_period format is YYYY-MM
         if (! empty($params['month']) && ! empty($params['year'])) {
-            $query->where('salary_month', $params['month'])
-                ->where('salary_year', $params['year']);
+            $salaryPeriod = sprintf('%04d-%02d', $params['year'], $params['month']);
+            $query->where('salary_period', $salaryPeriod);
+        }
+
+        // Direct salary_period filter
+        if (! empty($params['salary_period'])) {
+            $query->where('salary_period', $params['salary_period']);
         }
 
         $query = $this->applyOrdering($query, $params);
@@ -61,10 +66,11 @@ class PayrollService extends BaseService
     public function generateSalarySlip(int $staffMemberId, int $month, int $year): SalarySlip
     {
         return DB::transaction(function () use ($staffMemberId, $month, $year) {
+            $salaryPeriod = sprintf('%04d-%02d', $year, $month);
+
             // Check if slip already exists
             $existing = SalarySlip::where('staff_member_id', $staffMemberId)
-                ->where('salary_month', $month)
-                ->where('salary_year', $year)
+                ->where('salary_period', $salaryPeriod)
                 ->first();
 
             if ($existing) {
@@ -77,19 +83,19 @@ class PayrollService extends BaseService
             $baseSalary = $employee->base_salary ?? 0;
             $benefits = $this->calculateBenefits($staffMemberId, $month, $year);
             $deductions = $this->calculateDeductions($staffMemberId, $month, $year);
-            $netSalary = $baseSalary + $benefits['total'] - $deductions['total'];
+            $totalEarnings = $baseSalary + $benefits['total'];
+            $totalDeductions = $deductions['total'];
+            $netPayable = $totalEarnings - $totalDeductions;
 
             return SalarySlip::create([
                 'staff_member_id' => $staffMemberId,
-                'salary_month' => $month,
-                'salary_year' => $year,
+                'salary_period' => $salaryPeriod,
                 'basic_salary' => $baseSalary,
-                'allowances' => $benefits['total'],
-                'allowances_breakdown' => $benefits['breakdown'],
-                'deductions' => $deductions['total'],
+                'benefits_breakdown' => $benefits['breakdown'],
                 'deductions_breakdown' => $deductions['breakdown'],
-                'gross_salary' => $baseSalary + $benefits['total'],
-                'net_salary' => $netSalary,
+                'total_earnings' => $totalEarnings,
+                'total_deductions' => $totalDeductions,
+                'net_payable' => $netPayable,
                 'status' => 'generated',
                 'generated_at' => now(),
             ]);
@@ -211,18 +217,17 @@ class PayrollService extends BaseService
      */
     public function getMonthlyPayrollSummary(int $month, int $year): array
     {
-        $slips = SalarySlip::where('salary_month', $month)
-            ->where('salary_year', $year)
-            ->get();
+        $salaryPeriod = sprintf('%04d-%02d', $year, $month);
+        $slips = SalarySlip::where('salary_period', $salaryPeriod)->get();
 
         return [
             'month' => $month,
             'year' => $year,
+            'salary_period' => $salaryPeriod,
             'total_employees' => $slips->count(),
-            'total_gross_salary' => $slips->sum('gross_salary'),
-            'total_allowances' => $slips->sum('allowances'),
-            'total_deductions' => $slips->sum('deductions'),
-            'total_net_salary' => $slips->sum('net_salary'),
+            'total_earnings' => $slips->sum('total_earnings'),
+            'total_deductions' => $slips->sum('total_deductions'),
+            'total_net_payable' => $slips->sum('net_payable'),
             'paid_count' => $slips->where('status', 'paid')->count(),
             'pending_count' => $slips->where('status', 'generated')->count(),
         ];
@@ -234,8 +239,7 @@ class PayrollService extends BaseService
     public function getEmployeeSalaryHistory(int $staffMemberId, int $limit = 12): Collection
     {
         return SalarySlip::where('staff_member_id', $staffMemberId)
-            ->orderByDesc('salary_year')
-            ->orderByDesc('salary_month')
+            ->orderByDesc('salary_period')
             ->limit($limit)
             ->get();
     }
@@ -245,22 +249,20 @@ class PayrollService extends BaseService
      */
     public function getStatistics(): array
     {
-        $currentMonth = now()->month;
+        $currentPeriod = now()->format('Y-m');
         $currentYear = now()->year;
 
-        $monthlyData = SalarySlip::where('salary_month', $currentMonth)
-            ->where('salary_year', $currentYear)
-            ->get();
+        $monthlyData = SalarySlip::where('salary_period', $currentPeriod)->get();
 
         return [
             'current_month' => [
-                'total_salary' => $monthlyData->sum('net_salary'),
+                'total_salary' => $monthlyData->sum('net_payable'),
                 'employees_paid' => $monthlyData->where('status', 'paid')->count(),
                 'employees_pending' => $monthlyData->where('status', 'generated')->count(),
             ],
             'year_to_date' => [
-                'total_salary' => SalarySlip::where('salary_year', $currentYear)->sum('net_salary'),
-                'total_slips' => SalarySlip::where('salary_year', $currentYear)->count(),
+                'total_salary' => SalarySlip::where('salary_period', 'like', $currentYear.'-%')->sum('net_payable'),
+                'total_slips' => SalarySlip::where('salary_period', 'like', $currentYear.'-%')->count(),
             ],
         ];
     }

@@ -178,6 +178,11 @@ class DataImportController extends Controller
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
             try {
+                // Ensure data has same number of columns as headers
+                if (count($data) !== count($headers)) {
+                    // Pad or trim data to match headers
+                    $data = array_pad(array_slice($data, 0, count($headers)), count($headers), '');
+                }
                 $mapped = array_combine($headers, $data);
 
                 StaffMember::create([
@@ -230,6 +235,11 @@ class DataImportController extends Controller
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
             try {
+                // Ensure data has same number of columns as headers
+                if (count($data) !== count($headers)) {
+                    // Pad or trim data to match headers
+                    $data = array_pad(array_slice($data, 0, count($headers)), count($headers), '');
+                }
                 $mapped = array_combine($headers, $data);
 
                 $staff = StaffMember::where('staff_code', $mapped['staff_code'])->first();
@@ -287,6 +297,11 @@ class DataImportController extends Controller
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
             try {
+                // Ensure data has same number of columns as headers
+                if (count($data) !== count($headers)) {
+                    // Pad or trim data to match headers
+                    $data = array_pad(array_slice($data, 0, count($headers)), count($headers), '');
+                }
                 $mapped = array_combine($headers, $data);
 
                 CompanyHoliday::updateOrCreate(
