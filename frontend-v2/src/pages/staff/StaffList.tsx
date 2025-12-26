@@ -39,10 +39,7 @@ interface StaffMember {
   personal_email: string;
   work_email: string;
   phone_number: string;
-  job_title: { title: string } | null;
-  division: { title: string } | null;
-  office_location: { title: string } | null;
-  job_title: { title: string } | null;
+job_title: { title: string } | null;
   division: { title: string } | null;
   office_location: { title: string } | null;
   employment_status: string;
