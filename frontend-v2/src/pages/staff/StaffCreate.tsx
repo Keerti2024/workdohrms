@@ -106,6 +106,12 @@ export default function StaffCreate() {
       errors.full_name = 'Full name is required';
     }
 
+    if (!formData.email.trim()) {
+      errors.email = 'Work email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
     if (!formData.personal_email.trim()) {
       errors.personal_email = 'Personal email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.personal_email)) {
@@ -213,7 +219,21 @@ export default function StaffCreate() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className={fieldErrors.email ? 'text-red-500' : ''}>Personal Email *</Label>
+                <Label htmlFor="personal_email" className={fieldErrors.personal_email ? 'text-red-500' : ''}>Personal Email *</Label>
+                <Input
+                  id="personal_email"
+                  name="personal_email"
+                  type="email"
+                  value={formData.personal_email}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.personal_email}
+                />
+                {fieldErrors.personal_email && (
+                  <p className="text-sm text-red-500">{fieldErrors.personal_email}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className={fieldErrors.email ? 'text-red-500' : ''}>Work Email (Login) *</Label>
                 <Input
                   id="email"
                   name="email"
@@ -225,17 +245,6 @@ export default function StaffCreate() {
                 {fieldErrors.email && (
                   <p className="text-sm text-red-500">{fieldErrors.email}</p>
                 )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Work Email (Login) *</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="mobile_number">Mobile Number</Label>
