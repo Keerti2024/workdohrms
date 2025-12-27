@@ -1,4 +1,4 @@
-
+<?php
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\CompanyController;
