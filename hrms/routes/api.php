@@ -2,6 +2,8 @@
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\DocumentLocationController;
 
 
 // Auth Controllers
@@ -24,7 +26,7 @@ use App\Http\Controllers\Api\Company\MeetingController;
 use App\Http\Controllers\Api\Company\MeetingRoomController;
 use App\Http\Controllers\Api\Company\MeetingTypeController;
 use App\Http\Controllers\Api\Documents\DocumentCategoryController;
-use App\Http\Controllers\Api\Documents\DocumentTypeController;
+use App\Http\Controllers\Api\Documents\DocumentTypeController as LegacyDocumentTypeController;
 use App\Http\Controllers\Api\Documents\FileCategoryController;
 use App\Http\Controllers\Api\Documents\GeneratedLetterController;
 use App\Http\Controllers\Api\Documents\HrDocumentController;
@@ -549,5 +551,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies/{company}', [CompanyController::class, 'show']);
     Route::put('/companies/{company}', [CompanyController::class, 'update']);
     Route::delete('/companies/{company}', [CompanyController::class, 'destroy']);
+
+    // Document Types
+    Route::get('/document-types', [DocumentTypeController::class, 'index']);
+    Route::post('/document-types', [DocumentTypeController::class, 'store']);
+    Route::get('/document-types/{documentType}', [DocumentTypeController::class, 'show']);
+    Route::put('/document-types/{documentType}', [DocumentTypeController::class, 'update']);
+    Route::delete('/document-types/{documentType}', [DocumentTypeController::class, 'destroy']);
+
+    // Document Locations
+    Route::get('/document-locations', [DocumentLocationController::class, 'index']);
+    Route::get('/document-locations/{documentLocation}', [DocumentLocationController::class, 'show']);
+    Route::put('/document-locations/{documentLocation}', [DocumentLocationController::class, 'update']); // Toggle active
+    Route::post('/document-locations/{documentLocation}/config', [DocumentLocationController::class, 'updateConfig']); // Update credentials
 
 });
