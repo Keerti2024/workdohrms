@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { assetService } from '../../services/api';
+import { assetService, assetTypeService } from '../../services/api';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
 import { Badge } from '../../components/ui/badge';
 import {
   Dialog,
@@ -43,11 +42,21 @@ interface Asset {
   id: number;
   name: string;
   asset_code: string;
-  asset_type?: { name: string };
-  assigned_to?: { full_name: string };
-  purchase_date: string;
-  purchase_cost: number;
+  asset_type_id: number;
+  asset_type?: { id: number; title: string };
+  serial_number?: string;
+  purchase_date?: string;
+  purchase_cost?: number;
+  condition?: string;
+  location?: string;
   status: string;
+  current_value?: number;
+  assigned_to?: { full_name: string };
+}
+
+interface AssetType {
+  id: number;
+  title: string;
 }
 
 interface PaginationMeta {
@@ -59,6 +68,7 @@ interface PaginationMeta {
 
 export default function AssetsList() {
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [assetTypes, setAssetTypes] = useState<AssetType[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -69,34 +79,31 @@ export default function AssetsList() {
   const [viewingAsset, setViewingAsset] = useState<Asset | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    asset_code: '',
-    description: '',
+    asset_type_id: '',
+    serial_number: '',
     purchase_date: '',
     purchase_cost: '',
-    status: 'available',
+    condition: '',
+    location: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        name: formData.name,
+        asset_type_id: Number(formData.asset_type_id),
+        serial_number: formData.serial_number || null,
+        purchase_date: formData.purchase_date || null,
+        purchase_cost: formData.purchase_cost ? Number(formData.purchase_cost) : null,
+        condition: formData.condition || null,
+        location: formData.location || null,
+      };
+
       if (editingAsset) {
-        await assetService.update(editingAsset.id, {
-          name: formData.name,
-          asset_code: formData.asset_code,
-          description: formData.description,
-          purchase_date: formData.purchase_date,
-          purchase_cost: Number(formData.purchase_cost),
-          status: formData.status,
-        });
+        await assetService.update(editingAsset.id, payload);
       } else {
-        await assetService.create({
-          name: formData.name,
-          asset_code: formData.asset_code,
-          description: formData.description,
-          purchase_date: formData.purchase_date,
-          purchase_cost: Number(formData.purchase_cost),
-          status: formData.status,
-        });
+        await assetService.create(payload);
       }
       setIsDialogOpen(false);
       setEditingAsset(null);
@@ -111,11 +118,12 @@ export default function AssetsList() {
     setEditingAsset(asset);
     setFormData({
       name: asset.name,
-      asset_code: asset.asset_code,
-      description: '',
-      purchase_date: asset.purchase_date,
-      purchase_cost: String(asset.purchase_cost),
-      status: asset.status,
+      asset_type_id: String(asset.asset_type_id),
+      serial_number: asset.serial_number || '',
+      purchase_date: asset.purchase_date || '',
+      purchase_cost: asset.purchase_cost ? String(asset.purchase_cost) : '',
+      condition: asset.condition || '',
+      location: asset.location || '',
     });
     setIsDialogOpen(true);
   };
@@ -138,53 +146,69 @@ export default function AssetsList() {
   const resetForm = () => {
     setFormData({
       name: '',
-      asset_code: '',
-      description: '',
+      asset_type_id: '',
+      serial_number: '',
       purchase_date: '',
       purchase_cost: '',
-      status: 'available',
+      condition: '',
+      location: '',
     });
   };
 
   useEffect(() => {
     fetchAssets();
+    fetchAssetTypes();
   }, [page]);
 
-    const fetchAssets = async () => {
-      setIsLoading(true);
-      try {
-        const params: Record<string, unknown> = { page };
-        if (search) params.search = search;
-      
-        const response = await assetService.getAll(params);
-        // Handle paginated response: response.data.data is the paginator object
-        // The actual array is in response.data.data.data for paginated responses
-        const payload = response.data.data;
-        if (Array.isArray(payload)) {
-          // Non-paginated response (when paginate=false)
-          setAssets(payload);
-          setMeta(null);
-        } else if (payload && Array.isArray(payload.data)) {
-          // Paginated response - extract the array and meta from paginator
-          setAssets(payload.data);
-          setMeta({
-            current_page: payload.current_page,
-            last_page: payload.last_page,
-            per_page: payload.per_page,
-            total: payload.total,
-          });
-        } else {
-          // Fallback to empty array if response is unexpected
-          setAssets([]);
-          setMeta(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch assets:', error);
-        setAssets([]);
-      } finally {
-        setIsLoading(false);
+  const fetchAssetTypes = async () => {
+    try {
+      const response = await assetTypeService.getAll({});
+      const payload = response.data.data;
+      if (Array.isArray(payload)) {
+        setAssetTypes(payload);
+      } else if (payload && Array.isArray(payload.data)) {
+        setAssetTypes(payload.data);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch asset types:', error);
+    }
+  };
+
+  const fetchAssets = async () => {
+    setIsLoading(true);
+    try {
+      const params: Record<string, unknown> = { page };
+      if (search) params.search = search;
+
+      const response = await assetService.getAll(params);
+      // Handle paginated response: response.data.data is the paginator object
+      // The actual array is in response.data.data.data for paginated responses
+      const payload = response.data.data;
+      if (Array.isArray(payload)) {
+        // Non-paginated response (when paginate=false)
+        setAssets(payload);
+        setMeta(null);
+      } else if (payload && Array.isArray(payload.data)) {
+        // Paginated response - extract the array and meta from paginator
+        setAssets(payload.data);
+        setMeta({
+          current_page: payload.current_page,
+          last_page: payload.last_page,
+          per_page: payload.per_page,
+          total: payload.total,
+        });
+      } else {
+        // Fallback to empty array if response is unexpected
+        setAssets([]);
+        setMeta(null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch assets:', error);
+      setAssets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = () => {
     setPage(1);
@@ -235,36 +259,41 @@ export default function AssetsList() {
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Asset Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g., MacBook Pro"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="asset_code">Asset Code</Label>
-                    <Input
-                      id="asset_code"
-                      value={formData.asset_code}
-                      onChange={(e) => setFormData({ ...formData, asset_code: e.target.value })}
-                      placeholder="e.g., AST-001"
-                      required
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Asset Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., MacBook Pro"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Asset description..."
-                    rows={3}
+                  <Label htmlFor="asset_type_id">Asset Type *</Label>
+                  <Select
+                    value={formData.asset_type_id}
+                    onValueChange={(value) => setFormData({ ...formData, asset_type_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select asset type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assetTypes.map((type) => (
+                        <SelectItem key={type.id} value={String(type.id)}>
+                          {type.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="serial_number">Serial Number</Label>
+                  <Input
+                    id="serial_number"
+                    value={formData.serial_number}
+                    onChange={(e) => setFormData({ ...formData, serial_number: e.target.value })}
+                    placeholder="e.g., SN123456"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -275,7 +304,6 @@ export default function AssetsList() {
                       type="date"
                       value={formData.purchase_date}
                       onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -283,30 +311,41 @@ export default function AssetsList() {
                     <Input
                       id="purchase_cost"
                       type="number"
+                      min="0"
+                      step="0.01"
                       value={formData.purchase_cost}
                       onChange={(e) => setFormData({ ...formData, purchase_cost: e.target.value })}
                       placeholder="e.g., 1500"
-                      required
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="assigned">Assigned</SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="retired">Retired</SelectItem>
-                      <SelectItem value="lost">Lost</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="condition">Condition</Label>
+                    <Select
+                      value={formData.condition}
+                      onValueChange={(value) => setFormData({ ...formData, condition: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                        <SelectItem value="poor">Poor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      placeholder="e.g., Office Floor 2"
+                    />
+                  </div>
                 </div>
               </div>
               <DialogFooter>
@@ -343,7 +382,7 @@ export default function AssetsList() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-solarized-base01">Type</p>
-                  <p>{viewingAsset.asset_type?.name || '-'}</p>
+                  <p>{viewingAsset.asset_type?.title || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-solarized-base01">Status</p>
@@ -359,7 +398,7 @@ export default function AssetsList() {
                 </div>
                 <div>
                   <p className="text-sm text-solarized-base01">Purchase Cost</p>
-                  <p>{formatCurrency(viewingAsset.purchase_cost)}</p>
+                  <p>{formatCurrency(viewingAsset.purchase_cost || 0)}</p>
                 </div>
               </div>
               <div>
@@ -491,9 +530,9 @@ export default function AssetsList() {
                       <TableRow key={asset.id}>
                         <TableCell className="font-mono text-sm">{asset.asset_code}</TableCell>
                         <TableCell className="font-medium">{asset.name}</TableCell>
-                        <TableCell>{asset.asset_type?.name || '-'}</TableCell>
+                        <TableCell>{asset.asset_type?.title || '-'}</TableCell>
                         <TableCell>{asset.assigned_to?.full_name || '-'}</TableCell>
-                        <TableCell>{formatCurrency(asset.purchase_cost)}</TableCell>
+                        <TableCell>{formatCurrency(asset.purchase_cost || 0)}</TableCell>
                         <TableCell>
                           <Badge className={getStatusBadge(asset.status)}>
                             {asset.status}
