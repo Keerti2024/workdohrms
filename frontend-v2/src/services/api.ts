@@ -33,7 +33,7 @@ api.interceptors.response.use(
 export default api;
 
 export const authService = {
-  login: (email: string, password: string) => 
+  login: (email: string, password: string) =>
     api.post('/auth/sign-in', { email, password }),
   register: (data: { name: string; email: string; password: string; password_confirmation: string }) =>
     api.post('/auth/sign-up', data),
@@ -52,14 +52,14 @@ export const dashboardService = {
 };
 
 export const staffService = {
-  getAll: (params?: { page?: number; per_page?: number; search?: string }) => 
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) =>
     api.get('/staff-members', { params }),
   getById: (id: number) => api.get(`/staff-members/${id}`),
   create: (data: Record<string, unknown>) => api.post('/staff-members', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/staff-members/${id}`, data),
   delete: (id: number) => api.delete(`/staff-members/${id}`),
   getFiles: (id: number) => api.get(`/staff-members/${id}/files`),
-  uploadFile: (id: number, data: FormData) => 
+  uploadFile: (id: number, data: FormData) =>
     api.post(`/staff-members/${id}/files`, data, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
@@ -375,17 +375,37 @@ export const settingsService = {
 };
 
 export const adminService = {
-  getUsers: (params?: { page?: number; search?: string }) => api.get('/users', { params }),
+  getUsers: (params?: { page?: number; per_page?: number; search?: string; role?: string }) => api.get('/users', { params }),
+  getUser: (id: number) => api.get(`/users/${id}`),
   createUser: (data: Record<string, unknown>) => api.post('/users', data),
   updateUser: (id: number, data: Record<string, unknown>) => api.put(`/users/${id}`, data),
   deleteUser: (id: number) => api.delete(`/users/${id}`),
-  getRoles: () => api.get('/roles'),
-  createRole: (data: Record<string, unknown>) => api.post('/roles', data),
-  updateRole: (id: number, data: Record<string, unknown>) => api.put(`/roles/${id}`, data),
-  deleteRole: (id: number) => api.delete(`/roles/${id}`),
-  getPermissions: (params?: { page?: number; search?: string; module?: string }) => api.get('/permissions', { params }),
-  assignPermissions: (roleId: number, data: { permissions: string[] }) =>
-    api.post(`/roles/${roleId}/permissions`, data),
+  getUserRoles: (id: number) => api.get(`/users/${id}/roles`),
+  assignUserRoles: (id: number, data: { roles: string[] }) => api.post(`/users/${id}/roles`, data),
+  addUserRole: (id: number, data: { role: string }) => api.post(`/users/${id}/roles/add`, data),
+  removeUserRole: (id: number, data: { role: string }) => api.post(`/users/${id}/roles/remove`, data),
+};
+
+export const roleService = {
+  getAll: (params?: { search?: string }) => api.get('/roles', { params }),
+  getById: (id: number) => api.get(`/roles/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/roles', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/roles/${id}`, data),
+  delete: (id: number) => api.delete(`/roles/${id}`),
+  getPermissions: (id: number) => api.get(`/roles/${id}/permissions`),
+  syncPermissions: (id: number, data: { permissions: string[] }) => api.post(`/roles/${id}/permissions`, data),
+};
+
+export const permissionService = {
+  getAll: (params?: { search?: string; resource?: string }) => api.get('/permissions', { params }),
+  getGrouped: () => api.get('/permissions/grouped'),
+  getById: (id: number) => api.get(`/permissions/${id}`),
+};
+
+export const resourceService = {
+  getAll: (params?: { search?: string }) => api.get('/resources', { params }),
+  getById: (id: number) => api.get(`/resources/${id}`),
+  getBySlug: (slug: string) => api.get(`/resources/slug/${slug}`),
 };
 
 export const organizationService = {
@@ -394,4 +414,46 @@ export const organizationService = {
   create: (data: Record<string, unknown>) => api.post('/organizations', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/organizations/${id}`, data),
   delete: (id: number) => api.delete(`/organizations/${id}`),
+};
+
+export const companyService = {
+  getAll: (params?: { page?: number; search?: string }) => api.get('/companies', { params }),
+  getById: (id: number) => api.get(`/companies/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/companies', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/companies/${id}`, data),
+  delete: (id: number) => api.delete(`/companies/${id}`),
+};
+
+export const assetTypeService = {
+  getAll: (params?: { page?: number; search?: string }) => api.get('/asset-types', { params }),
+  getById: (id: number) => api.get(`/asset-types/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/asset-types', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/asset-types/${id}`, data),
+  delete: (id: number) => api.delete(`/asset-types/${id}`),
+};
+
+export const documentTypeService = {
+  getAll: (params?: { page?: number; search?: string }) => api.get('/document-types', { params }),
+  getById: (id: number) => api.get(`/document-types/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/document-types', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/document-types/${id}`, data),
+  delete: (id: number) => api.delete(`/document-types/${id}`),
+};
+
+export const documentLocationService = {
+  getAll: (params?: { page?: number; search?: string }) => api.get('/document-locations', { params }),
+  getById: (id: number) => api.get(`/document-locations/${id}`),
+  create: (data: Record<string, unknown>) => api.post('/document-locations', data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/document-locations/${id}`, data),
+  delete: (id: number) => api.delete(`/document-locations/${id}`),
+};
+
+export const documentConfigService = {
+  createLocal: (data: Record<string, unknown>) => api.post('/document-configs/local', data),
+  updateLocal: (id: number, data: Record<string, unknown>) => api.put(`/document-configs/local/${id}`, data),
+  createWasabi: (data: Record<string, unknown>) => api.post('/document-configs/wasabi', data),
+  updateWasabi: (id: number, data: Record<string, unknown>) => api.put(`/document-configs/wasabi/${id}`, data),
+  createAws: (data: Record<string, unknown>) => api.post('/document-configs/aws', data),
+  updateAws: (id: number, data: Record<string, unknown>) => api.put(`/document-configs/aws/${id}`, data),
+  getConfig: (locationId: number) => api.get(`/document-configs/${locationId}`),
 };

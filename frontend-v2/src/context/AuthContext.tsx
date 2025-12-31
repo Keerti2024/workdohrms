@@ -5,9 +5,18 @@ interface User {
   id: number;
   name: string;
   email: string;
+  role: string;
+  role_display: string;
   roles: string[];
   permissions: string[];
+  primary_role: string;
+  primary_role_icon: string;
+  primary_role_hierarchy: number;
   staff_member_id?: number;
+  org_id?: number;
+  company_id?: number;
+  organization_name?: string;
+  company_name?: string;
 }
 
 interface AuthContextType {
@@ -32,24 +41,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       const storedToken = localStorage.getItem('auth_token');
       const storedUser = localStorage.getItem('user');
-      
+
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
       }
       setIsLoading(false);
     };
-    
+
     initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     const response = await authService.login(email, password);
     const { token: newToken, user: userData } = response.data.data;
-    
+
     localStorage.setItem('auth_token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     setToken(newToken);
     setUser(userData);
   };
