@@ -247,7 +247,7 @@ export default function DocumentConfiguration() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-2">
-                                    {configuredLocations.length > 0 && (
+                                    {/* {configuredLocations.length > 0 && (
                                         <div className="text-xs text-solarized-base01 mb-2 max-h-20 overflow-y-auto">
                                             {configuredLocations.map(loc => (
                                                 <div key={loc.id} className="truncate">
@@ -255,7 +255,7 @@ export default function DocumentConfiguration() {
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
+                                    )} */}
                                     <Button
                                         size="sm"
                                         className="bg-solarized-blue hover:bg-solarized-blue/90 w-full"
