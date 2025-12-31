@@ -44,7 +44,8 @@ interface Asset {
     name: string;
     asset_code: string;
     status: string;
-    assigned_to?: {
+    assigned_to?: number; // ID only
+    assigned_employee?: {
         id: number;
         full_name: string;
     };
@@ -98,10 +99,10 @@ export default function AssetAssignmentList() {
         setIsLoading(true);
         try {
             // Fetch assets with status='assigned'
-            const response = await assetService.getAll({ 
+            const response = await assetService.getAll({
                 status: 'assigned',
-                page, 
-                search 
+                page,
+                search
             });
             const payload = response.data.data;
 
@@ -136,9 +137,9 @@ export default function AssetAssignmentList() {
     const fetchAvailableAssets = async () => {
         try {
             const response = await assetService.getAvailable();
-             // Assuming response structure is similar to others, but available might be direct array or data key
-             const data = response.data.data || response.data; 
-             setAvailableAssets(Array.isArray(data) ? data : []);
+            // Assuming response structure is similar to others, but available might be direct array or data key
+            const data = response.data.data || response.data;
+            setAvailableAssets(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch available assets:', error);
             toast({
@@ -175,7 +176,7 @@ export default function AssetAssignmentList() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.asset_id || !formData.staff_member_id) {
-             toast({
+            toast({
                 variant: 'destructive',
                 title: 'Error',
                 description: 'Please select both an asset and a staff member',
@@ -189,12 +190,12 @@ export default function AssetAssignmentList() {
                 staff_member_id: Number(formData.staff_member_id),
                 notes: formData.notes
             });
-            
+
             toast({
                 title: 'Success',
                 description: 'Asset assigned successfully',
             });
-            
+
             setIsDialogOpen(false);
             resetForm();
             fetchAssignments();
@@ -270,7 +271,7 @@ export default function AssetAssignmentList() {
                                             <SelectValue placeholder="Select staff member" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                             {staffList.map((staff) => (
+                                            {staffList.map((staff) => (
                                                 <SelectItem key={staff.id} value={String(staff.id)}>
                                                     {staff.full_name}
                                                 </SelectItem>
@@ -351,8 +352,8 @@ export default function AssetAssignmentList() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Asset</TableHead>
-                                            <TableHead>Code</TableHead>
-                                            <TableHead>Assigned To</TableHead>
+                                            {/* <TableHead>Code</TableHead> */}
+                                            <TableHead>Assigned Staff</TableHead>
                                             <TableHead>Assigned Date</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -362,10 +363,10 @@ export default function AssetAssignmentList() {
                                                 <TableCell className="font-medium text-solarized-base02">
                                                     {asset.name}
                                                 </TableCell>
-                                                <TableCell className="font-mono text-xs">{asset.asset_code}</TableCell>
-                                                <TableCell>{asset.assigned_to?.full_name || 'Unknown'}</TableCell>
+                                                {/* <TableCell className="font-mono text-xs">{asset.asset_code}</TableCell> */}
+                                                <TableCell>{asset.assigned_employee?.full_name || 'Unknown'}</TableCell>
                                                 <TableCell>
-                                                    {asset.assigned_date 
+                                                    {asset.assigned_date
                                                         ? new Date(asset.assigned_date).toLocaleDateString()
                                                         : '-'
                                                     }

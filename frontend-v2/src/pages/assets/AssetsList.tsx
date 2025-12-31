@@ -61,7 +61,12 @@ interface Asset {
   location?: string;
   status: string;
   current_value?: number;
-  assigned_to?: { full_name: string };
+  // assigned_to?: { full_name: string };
+    // FIX HERE
+  assigned_employee?: {
+    id: number;
+    full_name: string;
+  };
 }
 
 interface AssetType {
@@ -480,7 +485,7 @@ export default function AssetsList() {
               </div>
               <div>
                 <p className="text-sm text-solarized-base01">Assigned To</p>
-                <p>{viewingAsset.assigned_to?.full_name || "Not assigned"}</p>
+                <p>{viewingAsset.assigned_employee?.full_name || "Not assigned"}</p>
               </div>
             </div>
           )}
@@ -625,7 +630,7 @@ export default function AssetsList() {
                         </TableCell>
                         <TableCell>{asset.asset_type?.title || "-"}</TableCell>
                         <TableCell>
-                          {asset.assigned_to?.full_name || "-"}
+                          {asset.assigned_employee?.full_name || "-"}
                         </TableCell>
                         <TableCell>
                           {formatCurrency(asset.purchase_cost || 0)}
