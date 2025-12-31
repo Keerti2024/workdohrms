@@ -62,6 +62,7 @@ import Appraisals from './pages/performance/Appraisals';
 
 // Assets
 import AssetsList from './pages/assets/AssetsList';
+import AssetAssignmentList from './pages/assets/AssetAssignmentList';
 
 // Training
 import Programs from './pages/training/Programs';
@@ -170,6 +171,7 @@ function App() {
 
             {/* Assets */}
             <Route path="/assets" element={<AssetsList />} />
+            <Route path="/assets/assignments" element={<AssetAssignmentList />} />
 
             {/* Training */}
             <Route path="/training" element={<Programs />} />
