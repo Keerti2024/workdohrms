@@ -117,6 +117,7 @@ const navigation: NavItem[] = [
       { name: 'Job Categories', href: '/recruitment/job/categories' },
       { name: 'Jobs', href: '/recruitment/jobs' },
       { name: 'Candidates', href: '/recruitment/candidates' },
+      { name: 'Job Stages', href: '/recruitment/job/stages' },
       { name: 'Applications', href: '/recruitment/applications' },
       { name: 'Interviews', href: '/recruitment/interviews' },
     ]
