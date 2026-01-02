@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { payrollService } from '../../services/api';
+import { showAlert } from '../../lib/sweetalert';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -24,7 +25,6 @@ import {
   Filter,
   AlertCircle 
 } from 'lucide-react';
-import { toast } from 'sonner'; // or use your toast library
 
 interface SalarySlip {
   id: number;
@@ -92,7 +92,7 @@ export default function SalarySlips() {
       setMeta(response.data.meta);
     } catch (error) {
       console.error('Failed to fetch salary slips:', error);
-      toast.error('Failed to fetch salary slips');
+      showAlert('error', 'Error', 'Failed to fetch salary slips');
     } finally {
       setIsLoading(false);
     }
@@ -101,21 +101,21 @@ export default function SalarySlips() {
   const handleDownload = async (id: number) => {
     try {
       // First check if we need to implement this endpoint
-      toast.info('PDF download feature coming soon!');
+      showAlert('warning', 'Coming Soon', 'PDF download feature coming soon!');
       return;
       
       // Uncomment when backend implements download endpoint
-      // const response = await payrollService.downloadSlip(id);
-      // const url = window.URL.createObjectURL(new Blob([response.data]));
-      // const link = document.createElement('a');
-      // link.href = url;
-      // link.setAttribute('download', `salary-slip-${id}.pdf`);
-      // document.body.appendChild(link);
-      // link.click();
-      // link.remove();
+      const response = await payrollService.downloadSlip(id);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `salary-slip-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (error) {
       console.error('Failed to download slip:', error);
-      toast.error('PDF download not available yet');
+      showAlert('error', 'Error', 'PDF download not available yet');
     }
   };
 
@@ -313,13 +313,13 @@ export default function SalarySlips() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDownload(slip.id)}
-                                title="Download PDF (Coming Soon)"
+                                // title="Download PDF (Coming Soon)"
                                 className="relative group"
                               >
                                 <Download className="h-4 w-4" />
-                                <span className="absolute -top-1 -right-1">
+                                {/* <span className="absolute -top-1 -right-1">
                                   <AlertCircle className="h-3 w-3 text-yellow-500" />
-                                </span>
+                                </span> */}
                               </Button>
                             </div>
                           </TableCell>

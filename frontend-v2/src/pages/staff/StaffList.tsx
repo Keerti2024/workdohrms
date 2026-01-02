@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { staffService } from '../../services/api';
+import { showAlert, showConfirmDialog, getErrorMessage } from '../../lib/sweetalert';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -54,6 +55,39 @@ export default function StaffList() {
   const [perPage] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
 
+    const fetchStaff = async () => {
+      setIsLoading(true);
+      try {
+        const response = await staffService.getAll({ page, per_page: 10, search });
+        // Handle paginated response: response.data.data is the paginator object
+        // The actual array is in response.data.data.data for paginated responses
+        const payload = response.data.data;
+        if (Array.isArray(payload)) {
+          // Non-paginated response
+          setStaff(payload);
+          setMeta(null);
+        } else if (payload && Array.isArray(payload.data)) {
+          // Paginated response - extract the array and meta from paginator
+          setStaff(payload.data);
+          setMeta({
+            current_page: payload.current_page,
+            last_page: payload.last_page,
+            per_page: payload.per_page,
+            total: payload.total,
+          });
+        } else {
+          // Fallback to empty array if response is unexpected
+          setStaff([]);
+          setMeta(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch staff:', error);
+        showAlert('error', 'Error', 'Failed to fetch staff members');
+        setStaff([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
   const fetchStaff = useCallback(async (currentPage: number = 1) => {
     setIsLoading(true);
     try {
@@ -95,12 +129,22 @@ export default function StaffList() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this staff member?')) return;
+    const result = await showConfirmDialog(
+      'Are you sure?',
+      'You want to delete this staff member?'
+    );
+
+    if (!result.isConfirmed) return;
+
     try {
       await staffService.delete(id);
+      showAlert('success', 'Deleted!', 'Staff member deleted successfully', 2000);
+      fetchStaff();
+    } catch (error: unknown) {
       fetchStaff(page);
     } catch (error) {
       console.error('Failed to delete staff:', error);
+      showAlert('error', 'Error', getErrorMessage(error, 'Failed to delete staff member'));
     }
   };
 
