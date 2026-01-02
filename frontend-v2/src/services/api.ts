@@ -350,11 +350,11 @@ export const reportService = {
 };
 
 export const settingsService = {
-  // getOfficeLocations: () => api.get('/office-locations'),
+  getOfficeLocations: () => api.get('/office-locations'),
   createOfficeLocation: (data: Record<string, unknown>) => api.post('/office-locations', data),
   updateOfficeLocation: (id: number, data: Record<string, unknown>) => api.put(`/office-locations/${id}`, data),
   deleteOfficeLocation: (id: number) => api.delete(`/office-locations/${id}`),
-  // getDivisions: () => api.get('/divisions'),
+  getDivisions: () => api.get('/divisions'),
   createDivision: (data: Record<string, unknown>) => api.post('/divisions', data),
   updateDivision: (id: number, data: Record<string, unknown>) => api.put(`/divisions/${id}`, data),
   deleteDivision: (id: number) => api.delete(`/divisions/${id}`),
