@@ -100,7 +100,7 @@ export const payrollService = {
   bulkGenerate: (data: { employee_ids: number[]; month: number; year: number }) =>
     api.post('/salary-slips/bulk-generate', data),
   getSlipById: (id: number) => api.get(`/salary-slips/${id}`),
-  downloadSlip: (id: number) => api.get(`/payroll/salary-slips/${id}/download`, { responseType: 'blob' }),
+  downloadSlip: (id: number) => api.get(`/salary-slips/${id}/download`, { responseType: 'blob' }),
   // Updated benefits methods for top-level routes
   getBenefits: (params?: { staff_member_id?: number; benefit_type_id?: number; active?: boolean; paginate?: boolean; page?: number; per_page?: number }) =>
     api.get('/staff-benefits', { params }),
@@ -213,7 +213,6 @@ export const recruitmentService = {
   getDivisions: () => api.get('/divisions'),
   getJobs: (params?: {
     status?: string;
-     paginate?: boolean;
     page?: number;
     per_page?: number;
     search?: string;
@@ -437,11 +436,11 @@ export const reportService = {
 };
 
 export const settingsService = {
-  // getOfficeLocations: () => api.get('/office-locations'),
+  getOfficeLocations: () => api.get('/office-locations'),
   createOfficeLocation: (data: Record<string, unknown>) => api.post('/office-locations', data),
   updateOfficeLocation: (id: number, data: Record<string, unknown>) => api.put(`/office-locations/${id}`, data),
   deleteOfficeLocation: (id: number) => api.delete(`/office-locations/${id}`),
-  // getDivisions: () => api.get('/divisions'),
+  getDivisions: () => api.get('/divisions'),
   createDivision: (data: Record<string, unknown>) => api.post('/divisions', data),
   updateDivision: (id: number, data: Record<string, unknown>) => api.put(`/divisions/${id}`, data),
   deleteDivision: (id: number) => api.delete(`/divisions/${id}`),
