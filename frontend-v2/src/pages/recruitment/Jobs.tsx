@@ -63,23 +63,23 @@ interface Job {
   status: string;
   start_date?: string;
   end_date?: string;
-  category?: { 
-    id: number; 
+  category?: {
+    id: number;
     title: string;  // Changed from 'name' to 'title'
     description?: string;
     created_at?: string;
     updated_at?: string;
   };
   office_location?: {  // Changed from 'officeLocation' to match API
-    id: number; 
+    id: number;
     title: string;  // Changed from 'name' to 'title'
     address?: string;
     contact_phone?: string;
     contact_email?: string;
     is_active?: boolean;
   };
-  division?: { 
-    id: number; 
+  division?: {
+    id: number;
     title: string;  // Changed from 'name' to 'title'
     office_location_id?: number;
     notes?: string;
@@ -161,63 +161,63 @@ export default function Jobs() {
   }, [page, statusFilter, search]);
 
   // Fetch jobs with filters
-const fetchJobs = async () => {
-  setIsLoading(true);
-  try {
-    const params: any = {
-      page,
-      per_page: 10
-    };
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const params: any = {
+        page,
+        per_page: 10
+      };
 
-    if (statusFilter && statusFilter !== 'all') {
-      params.status = statusFilter;
+      if (statusFilter && statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+
+      if (search) {
+        params.search = search;
+      }
+
+      const response = await recruitmentService.getJobs(params);
+
+      if (response.data.success) {
+        debugger;
+        const jobsData = response.data.data || [];
+
+        // Map API data to match our Job interface
+        const mappedJobs = jobsData.map((job: any) => ({
+          ...job,
+          category: job.category ? {
+            id: job.category.id,
+            title: job.category.title,
+            description: job.category.description
+          } : undefined,
+          office_location: job.office_location ? {  // Use the correct field name from API
+            id: job.office_location.id,
+            title: job.office_location.title,
+            address: job.office_location.address,
+            contact_phone: job.office_location.contact_phone,
+            contact_email: job.office_location.contact_email,
+            is_active: job.office_location.is_active
+          } : undefined,
+          division: job.division ? {
+            id: job.division.id,
+            title: job.division.title,
+            office_location_id: job.division.office_location_id,
+            notes: job.division.notes,
+            is_active: job.division.is_active
+          } : undefined
+        }));
+
+        setJobs(mappedJobs);
+        setMeta(response.data.data.meta);
+      }
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+      showAlert('error', 'Error', 'Failed to fetch jobs');
+    } finally {
+      setIsLoading(false);
     }
-
-    if (search) {
-      params.search = search;
-    }
-
-    const response = await recruitmentService.getJobs(params);
-
-    if (response.data.success) {
-      debugger;
-      const jobsData = response.data.data || [];
-      
-      // Map API data to match our Job interface
-      const mappedJobs = jobsData.map((job: any) => ({
-        ...job,
-        category: job.category ? {
-          id: job.category.id,
-          title: job.category.title,
-          description: job.category.description
-        } : undefined,
-        office_location: job.office_location ? {  // Use the correct field name from API
-          id: job.office_location.id,
-          title: job.office_location.title,
-          address: job.office_location.address,
-          contact_phone: job.office_location.contact_phone,
-          contact_email: job.office_location.contact_email,
-          is_active: job.office_location.is_active
-        } : undefined,
-        division: job.division ? {
-          id: job.division.id,
-          title: job.division.title,
-          office_location_id: job.division.office_location_id,
-          notes: job.division.notes,
-          is_active: job.division.is_active
-        } : undefined
-      }));
-
-      setJobs(mappedJobs);
-      setMeta(response.data.data.meta);
-    }
-  } catch (error) {
-    console.error('Failed to fetch jobs:', error);
-    showAlert('error', 'Error', 'Failed to fetch jobs');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   // Fetch dropdown data
   const fetchDropdownData = async () => {
@@ -373,46 +373,46 @@ const fetchJobs = async () => {
   };
 
   // Handle view job
-// Handle view job with dedicated endpoint
-const handleView = async (job: Job) => {
-  try {
-    const response = await recruitmentService.getJobById(job.id);
-    
-    if (response.data.success) {
-      const jobData = response.data.data; // Adjust based on your API response structure
-      
-      const mappedJob: Job = {
-        ...jobData,
-        category: jobData.category ? {
-          id: jobData.category.id,
-          title: jobData.category.title,
-          description: jobData.category.description
-        } : undefined,
-        office_location: jobData.office_location ? {
-          id: jobData.office_location.id,
-          title: jobData.office_location.title,
-          address: jobData.office_location.address,
-          contact_phone: jobData.office_location.contact_phone,
-          contact_email: jobData.office_location.contact_email,
-          is_active: jobData.office_location.is_active
-        } : undefined,
-        division: jobData.division ? {
-          id: jobData.division.id,
-          title: jobData.division.title,
-          office_location_id: jobData.division.office_location_id,
-          notes: jobData.division.notes,
-          is_active: jobData.division.is_active
-        } : undefined
-      };
-      
-      setViewingJob(mappedJob);
-      setIsViewDialogOpen(true);
+  // Handle view job with dedicated endpoint
+  const handleView = async (job: Job) => {
+    try {
+      const response = await recruitmentService.getJobById(job.id);
+
+      if (response.data.success) {
+        const jobData = response.data.data; // Adjust based on your API response structure
+
+        const mappedJob: Job = {
+          ...jobData,
+          category: jobData.category ? {
+            id: jobData.category.id,
+            title: jobData.category.title,
+            description: jobData.category.description
+          } : undefined,
+          office_location: jobData.office_location ? {
+            id: jobData.office_location.id,
+            title: jobData.office_location.title,
+            address: jobData.office_location.address,
+            contact_phone: jobData.office_location.contact_phone,
+            contact_email: jobData.office_location.contact_email,
+            is_active: jobData.office_location.is_active
+          } : undefined,
+          division: jobData.division ? {
+            id: jobData.division.id,
+            title: jobData.division.title,
+            office_location_id: jobData.division.office_location_id,
+            notes: jobData.division.notes,
+            is_active: jobData.division.is_active
+          } : undefined
+        };
+
+        setViewingJob(mappedJob);
+        setIsViewDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch job details:', error);
+      showAlert('error', 'Error', 'Failed to fetch job details');
     }
-  } catch (error) {
-    console.error('Failed to fetch job details:', error);
-    showAlert('error', 'Error', 'Failed to fetch job details');
-  }
-};
+  };
 
   // Handle delete job
   const handleDelete = async (id: number) => {
@@ -573,7 +573,7 @@ const handleView = async (job: Job) => {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-solarized-blue hover:bg-solarized-blue/90"
                 onClick={() => {
                   setEditingJob(null);
                   resetForm();
@@ -840,7 +840,7 @@ const handleView = async (job: Job) => {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-solarized-blue hover:bg-solarized-blue/90"
                   >
                     {editingJob ? 'Update Job' : 'Create Job'}
                   </Button>
@@ -935,7 +935,7 @@ const handleView = async (job: Job) => {
                   : "Create your first job posting to start recruiting."}
               </p>
               <Button
-                className="mt-4 bg-blue-600 hover:bg-blue-700"
+                className="mt-4 bg-solarized-blue hover:bg-solarized-blue/90"
                 onClick={() => setIsDialogOpen(true)}
               >
                 <Plus className="mr-2 h-4 w-4" />

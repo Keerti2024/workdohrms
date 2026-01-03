@@ -182,6 +182,7 @@ export default function Shifts() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
+              className="bg-solarized-blue hover:bg-solarized-blue/90"
               onClick={() => {
                 setEditingShift(null);
                 setFormData({
@@ -278,7 +279,7 @@ export default function Shifts() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="bg-solarized-blue hover:bg-solarized-blue/90">
                   {editingShift ? 'Update' : 'Create'}
                 </Button>
               </DialogFooter>

@@ -245,7 +245,7 @@ export default function StaffList() {
           <p className="text-muted-foreground">Manage your organization employees</p>
         </div>
         <Link to="/staff/create">
-          <Button>
+          <Button className="bg-solarized-blue hover:bg-solarized-blue/90">
             <Plus className="mr-2 h-4 w-4" /> Add Staff
           </Button>
         </Link>
