@@ -496,7 +496,7 @@ export const resourceService = {
 };
 
 export const organizationService = {
-  getAll: (params?: { page?: number; search?: string }) => api.get('/organizations', { params }),
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/organizations', { params }),
   getById: (id: number) => api.get(`/organizations/${id}`),
   create: (data: Record<string, unknown>) => api.post('/organizations', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/organizations/${id}`, data),
@@ -504,7 +504,7 @@ export const organizationService = {
 };
 
 export const companyService = {
-  getAll: (params?: { page?: number; search?: string }) => api.get('/companies', { params }),
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/companies', { params }),
   getById: (id: number) => api.get(`/companies/${id}`),
   create: (data: Record<string, unknown>) => api.post('/companies', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/companies/${id}`, data),
@@ -512,7 +512,7 @@ export const companyService = {
 };
 
 export const assetTypeService = {
-  getAll: (params?: { page?: number; search?: string }) => api.get('/asset-types', { params }),
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/asset-types', { params }),
   getById: (id: number) => api.get(`/asset-types/${id}`),
   create: (data: Record<string, unknown>) => api.post('/asset-types', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/asset-types/${id}`, data),
@@ -520,7 +520,7 @@ export const assetTypeService = {
 };
 
 export const documentTypeService = {
-  getAll: (params?: { page?: number; search?: string }) => api.get('/document-types', { params }),
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/document-types', { params }),
   getById: (id: number) => api.get(`/document-types/${id}`),
   create: (data: Record<string, unknown>) => api.post('/document-types', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/document-types/${id}`, data),
@@ -528,7 +528,7 @@ export const documentTypeService = {
 };
 
 export const documentLocationService = {
-  getAll: (params?: { page?: number; search?: string }) => api.get('/document-locations', { params }),
+  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/document-locations', { params }),
   getById: (id: number) => api.get(`/document-locations/${id}`),
   create: (data: Record<string, unknown>) => api.post('/document-locations', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/document-locations/${id}`, data),

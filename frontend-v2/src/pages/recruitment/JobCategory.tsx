@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { showAlert, showConfirmDialog, getErrorMessage } from '../../lib/sweetalert';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -13,26 +13,16 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../../components/ui/dialog';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '../../components/ui/table';
 import { Badge } from '../../components/ui/badge';
-import { Skeleton } from '../../components/ui/skeleton';
-import { Plus, Briefcase, Building, Edit, Trash2, MoreVertical, FileText } from 'lucide-react';
 import { Textarea } from '../../components/ui/textarea';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
+import DataTable, { TableColumn } from 'react-data-table-component';
+import { Plus, Briefcase, Building, Edit, Trash2, MoreVertical, FileText, Search } from 'lucide-react';
 import { recruitmentService } from '@/services/api';
 
 interface JobCategory {
@@ -52,6 +42,12 @@ interface JobCategory {
 export default function JobCategories() {
     const [jobCategories, setJobCategories] = useState<JobCategory[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
+    const [searchInput, setSearchInput] = useState(''); // What user types
+    const [search, setSearch] = useState(''); // What's sent to API
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -59,34 +55,61 @@ export default function JobCategories() {
         title: '',
         description: '',
     });
-    const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchJobCategories = async () => {
-        setIsLoading(true);
-        try {
-            const response = await recruitmentService.getJobCategories({
-                paginate: false,
-                ...(searchTerm && { search: searchTerm })
-            });
-            console.log('Job categories response:', response.data);
+    // ================= FETCH JOB CATEGORIES =================
+    const fetchJobCategories = useCallback(
+        async (currentPage: number = 1) => {
+            setIsLoading(true);
+            try {
+                const response = await recruitmentService.getJobCategories({
+                    page: currentPage,
+                    per_page: perPage,
+                    ...(search && { search })
+                });
 
-            if (response.data && response.data.data) {
-                setJobCategories(response.data.data);
-            } else if (Array.isArray(response.data)) {
-                setJobCategories(response.data);
-            } else {
-                console.error('Unexpected response format:', response);
+                const { data, meta } = response.data;
+
+                if (Array.isArray(data)) {
+                    setJobCategories(data);
+                    setTotalRows(meta?.total ?? 0);
+                } else {
+                    setJobCategories([]);
+                    setTotalRows(0);
+                }
+            } catch (error) {
+                console.error('Failed to fetch job categories:', error);
+                showAlert('error', 'Error', 'Failed to fetch job categories');
                 setJobCategories([]);
+                setTotalRows(0);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error('Failed to fetch job categories:', error);
-            showAlert('error', 'Error', 'Failed to fetch job categories');
-            setJobCategories([]);
-        } finally {
-            setIsLoading(false);
-        }
+        },
+        [perPage, search]
+    );
+
+    useEffect(() => {
+        fetchJobCategories(page);
+    }, [page, fetchJobCategories]);
+
+    // ================= SEARCH =================
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setSearch(searchInput); // Update search state with current input
+        setPage(1);
     };
 
+    // ================= PAGINATION =================
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handlePerRowsChange = (newPerPage: number) => {
+        setPerPage(newPerPage);
+        setPage(1); // Reset to first page when changing rows per page
+    };
+
+    // ================= FORM HANDLERS =================
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -106,7 +129,7 @@ export default function JobCategories() {
             );
             setIsDialogOpen(false);
             resetForm();
-            fetchJobCategories();
+            fetchJobCategories(page);
         } catch (error: unknown) {
             console.error('Failed to save job category:', error);
             showAlert('error', 'Error', getErrorMessage(error, 'Failed to save job category'));
@@ -134,7 +157,7 @@ export default function JobCategories() {
         try {
             await recruitmentService.deleteJobCategory(id);
             showAlert('success', 'Deleted!', 'Job category deleted successfully', 2000);
-            fetchJobCategories();
+            fetchJobCategories(page);
         } catch (error: unknown) {
             console.error('Failed to delete job category:', error);
             showAlert('error', 'Error', getErrorMessage(error, 'Failed to delete job category'));
@@ -150,10 +173,6 @@ export default function JobCategories() {
         });
     };
 
-    useEffect(() => {
-        fetchJobCategories();
-    }, [searchTerm]);
-
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString('en-US', {
@@ -168,6 +187,89 @@ export default function JobCategories() {
 
     const totalJobsCount = jobCategories.reduce((sum, category) => sum + (category.jobs_count || 0), 0);
 
+    // ================= TABLE COLUMNS =================
+    const columns: TableColumn<JobCategory>[] = [
+        {
+            name: 'Title',
+            selector: (row) => row.title,
+            sortable: true,
+            minWidth: '180px',
+        },
+        {
+            name: 'Description',
+            selector: (row) => row.description || 'No description',
+            sortable: true,
+            grow: 2,
+        },
+        {
+            name: 'Jobs Count',
+            cell: (row) => (
+                <Badge
+                    className={
+                        row.jobs_count && row.jobs_count > 0
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                    }
+                >
+                    {row.jobs_count || 0} jobs
+                </Badge>
+            ),
+            minWidth: '120px',
+        },
+        {
+            name: 'Created',
+            selector: (row) => formatDate(row.created_at),
+            sortable: true,
+            minWidth: '120px',
+        },
+        {
+            name: 'Updated',
+            selector: (row) => formatDate(row.updated_at),
+            sortable: true,
+            minWidth: '120px',
+        },
+        {
+            name: 'Actions',
+            cell: (row) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(row)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <div
+                            title={
+                                (row.jobs_count ?? 0) > 0
+                                    ? 'Cannot delete: Category has jobs assigned'
+                                    : undefined
+                            }
+                        >
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    if ((row.jobs_count ?? 0) === 0) {
+                                        handleDelete(row.id);
+                                    }
+                                }}
+                                className={`text-red-600 ${(row.jobs_count ?? 0) > 0 ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        </div>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+            ignoreRowClick: true,
+            width: '80px',
+        },
+    ];
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -176,15 +278,18 @@ export default function JobCategories() {
                     <p className="text-solarized-base01">Manage job categories for recruitment</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="relative">
+                    <form onSubmit={handleSearchSubmit} className="flex gap-2">
                         <Input
                             type="search"
                             placeholder="Search categories..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             className="w-[250px]"
                         />
-                    </div>
+                        <Button type="submit" variant="outline" size="icon">
+                            <Search className="h-4 w-4" />
+                        </Button>
+                    </form>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
                         if (!open) {
                             resetForm();
@@ -310,116 +415,39 @@ export default function JobCategories() {
                 </Card>
             </div>
 
-            <Card className="border-0 shadow-md">
+            <Card>
                 <CardHeader>
                     <CardTitle>Job Categories List</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? (
-                        <div className="space-y-4">
-                            {[...Array(5)].map((_, i) => (
-                                <Skeleton key={i} className="h-12 w-full" />
-                            ))}
+                    {!isLoading && jobCategories.length === 0 ? (
+                        <div className="text-center py-12">
+                            <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-medium">
+                                {search ? 'No matching categories found' : 'No job categories found'}
+                            </h3>
+                            <p className="text-muted-foreground mt-1">
+                                {search
+                                    ? 'Try a different search term'
+                                    : 'Create your first job category to get started.'}
+                            </p>
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Jobs Count</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead>Updated</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {jobCategories.length > 0 ? (
-                                    jobCategories.map((category) => (
-                                        <TableRow key={category.id}>
-                                            <TableCell className="font-medium">{category.title}</TableCell>
-                                            <TableCell className="max-w-xs truncate">
-                                                {category.description || 'No description'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    className={
-                                                        category.jobs_count && category.jobs_count > 0
-                                                            ? 'bg-solarized-green/10 text-solarized-green'
-                                                            : 'bg-solarized-base01/10 text-solarized-base01'
-                                                    }
-                                                >
-                                                    {category.jobs_count || 0} jobs
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-sm">
-                                                {formatDate(category.created_at)}
-                                            </TableCell>
-                                            <TableCell className="text-sm">
-                                                {formatDate(category.updated_at)}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                                            <span className="sr-only">Open menu</span>
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        {/* <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
-                                                        <DropdownMenuItem onClick={() => handleEdit(category)}>
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </DropdownMenuItem>
-                                                        {/* <DropdownMenuSeparator /> */}
-                                                        <div
-                                                            className="relative"
-                                                            title={
-                                                                (category.jobs_count ?? 0) > 0
-                                                                    ? 'Cannot delete: Category has jobs assigned'
-                                                                    : undefined
-                                                            }
-                                                        >
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    if ((category.jobs_count ?? 0) === 0) {
-                                                                        handleDelete(category.id);
-                                                                    }
-                                                                }}
-                                                                className={`text-red-600 ${(category.jobs_count ?? 0) > 0
-                                                                        ? 'opacity-50 cursor-not-allowed'
-                                                                        : ''
-                                                                    }`}
-                                                            >
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                Delete
-                                                            </DropdownMenuItem>
-                                                        </div>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-8">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <Building className="h-12 w-12 text-solarized-base01 mb-4" />
-                                                <h3 className="text-lg font-medium text-solarized-base02">
-                                                    {searchTerm ? 'No matching categories found' : 'No job categories found'}
-                                                </h3>
-                                                <p className="text-solarized-base01 mt-1">
-                                                    {searchTerm
-                                                        ? 'Try a different search term'
-                                                        : 'Create your first job category to get started.'}
-                                                </p>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                        <DataTable
+                            columns={columns}
+                            data={jobCategories}
+                            progressPending={isLoading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={totalRows}
+                            paginationPerPage={perPage}
+                            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+                            paginationDefaultPage={page}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={handlePerRowsChange}
+                            highlightOnHover
+                            responsive
+                        />
                     )}
                 </CardContent>
             </Card>

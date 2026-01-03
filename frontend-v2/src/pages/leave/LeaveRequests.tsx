@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { leaveService } from '../../services/api';
 import { showAlert } from '../../lib/sweetalert';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
 import {
   Select,
   SelectContent,
@@ -27,12 +19,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
-import { Skeleton } from '../../components/ui/skeleton';
+import DataTable, { TableColumn } from 'react-data-table-component';
 import {
   Plus,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Eye,
 } from 'lucide-react';
 
@@ -56,47 +46,68 @@ interface LeaveRequest {
   created_at: string;
 }
 
-interface PaginationMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
-
 /* =========================
    COMPONENT
 ========================= */
 export default function LeaveRequests() {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalRows, setTotalRows] = useState(0);
   const [statusFilter, setStatusFilter] = useState('all');
 
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingRequest, setViewingRequest] = useState<LeaveRequest | null>(null);
 
+  // ================= FETCH REQUESTS =================
+  const fetchRequests = useCallback(
+    async (currentPage: number = 1) => {
+      setIsLoading(true);
+      try {
+        const params: Record<string, unknown> = {
+          page: currentPage,
+          per_page: perPage,
+        };
+        if (statusFilter !== 'all') params.status = statusFilter;
+
+        const response = await leaveService.getRequests(params);
+        const { data, meta } = response.data;
+
+        if (Array.isArray(data)) {
+          setRequests(data);
+          setTotalRows(meta?.total ?? 0);
+        } else {
+          setRequests([]);
+          setTotalRows(0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch leave requests:', error);
+        showAlert('error', 'Error', 'Failed to fetch leave requests');
+        setRequests([]);
+        setTotalRows(0);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [perPage, statusFilter]
+  );
+
   useEffect(() => {
-    fetchRequests();
-  }, [page, statusFilter]);
+    fetchRequests(page);
+  }, [page, fetchRequests]);
 
-  const fetchRequests = async () => {
-    setIsLoading(true);
-    try {
-      const params: Record<string, unknown> = { page };
-      if (statusFilter !== 'all') params.status = statusFilter;
-
-      const response = await leaveService.getRequests(params);
-      setRequests(response.data.data || []);
-      setMeta(response.data.meta);
-    } catch (error) {
-      console.error('Failed to fetch leave requests:', error);
-      showAlert('error', 'Error', 'Failed to fetch leave requests');
-    } finally {
-      setIsLoading(false);
-    }
+  // ================= PAGINATION =================
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
+  const handlePerRowsChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(1); // Reset to first page when changing rows per page
+  };
+
+  // ================= HANDLERS =================
   const handleView = (request: LeaveRequest) => {
     setViewingRequest(request);
     setIsViewDialogOpen(true);
@@ -104,16 +115,75 @@ export default function LeaveRequests() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, string> = {
-      pending: 'bg-solarized-yellow/10 text-solarized-yellow',
-      approved: 'bg-solarized-green/10 text-solarized-green',
-      declined: 'bg-solarized-red/10 text-solarized-red',
-      cancelled: 'bg-solarized-base01/10 text-solarized-base01',
+      pending: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-green-100 text-green-800',
+      declined: 'bg-red-100 text-red-800',
+      cancelled: 'bg-gray-100 text-gray-800',
     };
     return variants[status] || variants.pending;
   };
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString();
+  const formatDate = (date: string) => new Date(date).toLocaleDateString();
+
+  // ================= TABLE COLUMNS =================
+  const columns: TableColumn<LeaveRequest>[] = [
+    {
+      name: 'Employee',
+      selector: (row) => row.staff_member?.full_name || 'Unknown',
+      sortable: true,
+      minWidth: '150px',
+    },
+    {
+      name: 'Leave Type',
+      cell: (row) => (
+        <Badge className="bg-blue-100 text-blue-800">
+          {row.category?.title || 'Unknown'}
+        </Badge>
+      ),
+      minWidth: '120px',
+    },
+    {
+      name: 'Start Date',
+      selector: (row) => formatDate(row.start_date),
+      sortable: true,
+      minWidth: '120px',
+    },
+    {
+      name: 'End Date',
+      selector: (row) => formatDate(row.end_date),
+      sortable: true,
+      minWidth: '120px',
+    },
+    {
+      name: 'Days',
+      selector: (row) => row.total_days,
+      sortable: true,
+      width: '80px',
+    },
+    {
+      name: 'Status',
+      cell: (row) => (
+        <Badge className={getStatusBadge(row.approval_status)}>
+          {row.approval_status}
+        </Badge>
+      ),
+      minWidth: '100px',
+    },
+    {
+      name: 'Actions',
+      cell: (row) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleView(row)}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      ),
+      ignoreRowClick: true,
+      width: '80px',
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -132,7 +202,7 @@ export default function LeaveRequests() {
       </div>
 
       {/* TABLE */}
-      <Card className="border-0 shadow-md">
+      <Card>
         <CardHeader className="pb-4">
           <div className="flex justify-between">
             <CardTitle className="text-lg">My Requests</CardTitle>
@@ -151,75 +221,27 @@ export default function LeaveRequests() {
         </CardHeader>
 
         <CardContent>
-          {isLoading ? (
-            <Skeleton className="h-12 w-full" />
-          ) : requests.length === 0 ? (
+          {!isLoading && requests.length === 0 ? (
             <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-solarized-base01 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-solarized-base02">
-                No leave requests
-              </h3>
+              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p>No leave requests found</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead>Days</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {requests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">
-                      {request.category?.title || 'Unknown'}
-                    </TableCell>
-                    <TableCell>{formatDate(request.start_date)}</TableCell>
-                    <TableCell>{formatDate(request.end_date)}</TableCell>
-                    <TableCell>{request.total_days}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusBadge(request.approval_status)}>
-                        {request.approval_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleView(request)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-
-          {meta && meta.last_page > 1 && (
-            <div className="flex justify-between mt-6">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" /> Previous
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={page === meta.last_page}
-                onClick={() => setPage(page + 1)}
-              >
-                Next <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <DataTable
+              columns={columns}
+              data={requests}
+              progressPending={isLoading}
+              pagination
+              paginationServer
+              paginationTotalRows={totalRows}
+              paginationPerPage={perPage}
+              paginationRowsPerPageOptions={[5, 10, 15, 20]}
+              paginationDefaultPage={page}
+              onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              highlightOnHover
+              responsive
+            />
           )}
         </CardContent>
       </Card>

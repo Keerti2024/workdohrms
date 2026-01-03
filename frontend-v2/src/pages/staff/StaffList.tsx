@@ -44,19 +44,28 @@ export default function StaffList() {
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [perPage] = useState(10);
+  const [perPage, setPerPage] = useState(10);
   const [totalRows, setTotalRows] = useState(0);
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // ================= FETCH STAFF =================
   const fetchStaff = useCallback(
     async (currentPage: number = 1) => {
       setIsLoading(true);
       try {
-        const response = await staffService.getAll({
+        const params: Record<string, unknown> = {
           page: currentPage,
           per_page: perPage,
           search,
-        });
+        };
+
+        if (sortField) {
+          params.order_by = sortField;
+          params.order = sortDirection;
+        }
+
+        const response = await staffService.getAll(params);
 
         const { data, meta } = response.data;
 
@@ -76,7 +85,7 @@ export default function StaffList() {
         setIsLoading(false);
       }
     },
-    [perPage, search]
+    [perPage, search, sortField, sortDirection]
   );
 
   useEffect(() => {
@@ -92,6 +101,24 @@ export default function StaffList() {
   // ================= PAGINATION =================
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+  };
+
+  const handlePerRowsChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(1); // Reset to first page when changing rows per page
+  };
+
+  // ================= SORTING =================
+  const handleSort = (column: any, sortDirection: 'asc' | 'desc') => {
+    // Map column names to API field names
+    const fieldMap: Record<string, string> = {
+      'Employee': 'full_name',
+    };
+
+    const field = fieldMap[column.name] || column.name;
+    setSortField(field);
+    setSortDirection(sortDirection);
+    setPage(1); // Reset to first page when sorting
   };
 
   // ================= DELETE =================
@@ -136,6 +163,7 @@ export default function StaffList() {
   const columns: TableColumn<StaffMember>[] = [
     {
       name: 'Employee',
+      selector: (row) => row.full_name,
       cell: (row) => (
         <div className="flex items-center gap-3 py-2">
           <Avatar>
@@ -157,17 +185,14 @@ export default function StaffList() {
     {
       name: 'Job Title',
       selector: (row) => row.job_title?.title || '-',
-      sortable: true,
     },
     {
       name: 'Department',
       selector: (row) => row.division?.title || '-',
-      sortable: true,
     },
     {
       name: 'Location',
       selector: (row) => row.office_location?.title || '-',
-      sortable: true,
     },
     {
       name: 'Status',
@@ -176,7 +201,6 @@ export default function StaffList() {
           {row.employment_status?.replace('_', ' ') || 'Unknown'}
         </Badge>
       ),
-      sortable: true,
     },
     {
       name: 'Actions',
@@ -258,6 +282,9 @@ export default function StaffList() {
               paginationPerPage={perPage}
               paginationDefaultPage={page}
               onChangePage={handlePageChange}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onSort={handleSort}
+              sortServer
               highlightOnHover
               responsive
             />

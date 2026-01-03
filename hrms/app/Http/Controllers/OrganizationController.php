@@ -18,15 +18,27 @@ class OrganizationController extends Controller
     }
 
     /**
-     * List all Organizations
+     * List all Organizations with pagination
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $organizations = $this->orgService->getAllOrganizations();
+            $perPage = $request->input('per_page', 10);
+            $search = $request->input('search', null);
+            
+            $organizations = $this->orgService->getPaginatedOrganizations($perPage, $search);
+            
             return response()->json([
                 'success' => true,
-                'data' => $organizations
+                'data' => $organizations->items(),
+                'meta' => [
+                    'current_page' => $organizations->currentPage(),
+                    'total' => $organizations->total(),
+                    'per_page' => $organizations->perPage(),
+                    'last_page' => $organizations->lastPage(),
+                    'from' => $organizations->firstItem(),
+                    'to' => $organizations->lastItem(),
+                ]
             ]);
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
