@@ -16,25 +16,41 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { Skeleton } from '../../components/ui/skeleton';
-import { 
-  DollarSign, 
-  Download, 
-  Eye, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  DollarSign,
+  Download,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
   Filter,
-  AlertCircle 
+  AlertCircle
 } from 'lucide-react';
 
 interface SalarySlip {
   id: number;
   slip_reference: string;
-  staff_member?: { full_name: string };
+  staff_member: {
+    full_name: string;
+    staff_code: string;
+    personal_email: string | null;
+    mobile_number: string | null;
+    bank_account_name: string | null;
+    bank_account_number: string | null;
+    bank_name: string | null;
+    job_title?: {
+      title: string;
+    };
+  };
   salary_period: string;
-  total_earnings: number;
-  total_deductions: number;
-  net_payable: number;
+  basic_salary: string;
+  benefits_breakdown: Array<{ name: string; amount: string }>;
+  deductions_breakdown: Array<{ name: string; amount: string }>;
+  total_earnings: string;
+  total_deductions: string;
+  net_payable: string;
   status: string;
+  generated_at: string;
+  paid_at: string | null;
   created_at: string;
 }
 
@@ -78,15 +94,15 @@ export default function SalarySlips() {
     setIsLoading(true);
     try {
       const params: Record<string, unknown> = { page };
-      
+
       // Send month and year separately as the backend expects
       if (month && year) {
         params.month = month;
         params.year = year;
       }
-      
+
       console.log('Fetching with params:', params); // Debug log
-      
+
       const response = await payrollService.getSalarySlips(params);
       setSlips(response.data.data || []);
       setMeta(response.data.meta);
@@ -103,7 +119,7 @@ export default function SalarySlips() {
       // First check if we need to implement this endpoint
       // showAlert('warning', 'Coming Soon', 'PDF download feature coming soon!');
       // return;
-      
+
       // Uncomment when backend implements download endpoint
       const response = await payrollService.downloadSlip(id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -134,11 +150,12 @@ export default function SalarySlips() {
     return variants[status] || variants.generated;
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount || 0);
+    }).format(num || 0);
   };
 
   const handleFilter = () => {
@@ -180,15 +197,15 @@ export default function SalarySlips() {
                     placeholder="Select month and year"
                     className="flex-1"
                   />
-                  <Button 
-                    onClick={handleFilter} 
-                    className="bg-blue-600 hover:bg-blue-700"
+                  <Button
+                    onClick={handleFilter}
+                    className="bg-solarized-blue hover:bg-solarized-blue/90"
                   >
                     Apply Filter
                   </Button>
                   {salaryPeriod && (
-                    <Button 
-                      onClick={handleClearFilter} 
+                    <Button
+                      onClick={handleClearFilter}
                       variant="outline"
                     >
                       Clear
@@ -218,14 +235,14 @@ export default function SalarySlips() {
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900">No salary slips found</h3>
                 <p className="text-gray-600 mt-1">
-                  {salaryPeriod 
+                  {salaryPeriod
                     ? `No salary slips found for ${salaryPeriod}. Try a different period.`
                     : 'Generate payroll to create salary slips.'}
                 </p>
                 {salaryPeriod && (
-                  <Button 
-                    onClick={handleClearFilter} 
-                    variant="outline" 
+                  <Button
+                    onClick={handleClearFilter}
+                    variant="outline"
                     className="mt-4"
                   >
                     Clear Filter
@@ -244,16 +261,16 @@ export default function SalarySlips() {
                     </p>
                   </div>
                   {salaryPeriod && (
-                    <Button 
-                      onClick={handleClearFilter} 
-                      variant="outline" 
+                    <Button
+                      onClick={handleClearFilter}
+                      variant="outline"
                       size="sm"
                     >
                       Clear Filter
                     </Button>
                   )}
                 </div>
-                
+
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -301,14 +318,14 @@ export default function SalarySlips() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1">
-                              <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => handleViewDetails(slip)}
-                                  title="View Details"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewDetails(slip)}
+                                title="View Details"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -357,7 +374,7 @@ export default function SalarySlips() {
                           } else {
                             pageNum = page - 2 + i;
                           }
-                          
+
                           return (
                             <Button
                               key={pageNum}

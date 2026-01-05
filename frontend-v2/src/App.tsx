@@ -26,7 +26,7 @@ import CompanyList from './pages/company/CompanyList';
 
 // Assets
 import AssetTypeList from './pages/assets/AssetTypeList';
-
+import AssetAssignmentList from './pages/assets/AssetAssignmentList';
 // Documents
 import DocumentTypeList from './pages/documents/DocumentTypeList';
 import DocumentLocationList from './pages/documents/DocumentLocationList';
@@ -65,6 +65,7 @@ import AssetsList from './pages/assets/AssetsList';
 
 // Training
 import Programs from './pages/training/Programs';
+import TrainingTypeList from './pages/training/TrainingTypeList';
 
 // Contracts
 import Contracts from './pages/contracts/Contracts';
@@ -73,6 +74,8 @@ import ContractRenewals from './pages/contracts/ContractRenewals';
 
 // Meetings
 import Meetings from './pages/meetings/Meetings';
+import MeetingTypes from './pages/meetings/MeetingTypes';
+import MeetingRooms from './pages/meetings/MeetingRooms';
 
 // Reports
 import AttendanceReport from './pages/reports/AttendanceReport';
@@ -97,6 +100,10 @@ import WithholdingTypes from './pages/payroll/WithHoldingType';
 import JobCategories from './pages/recruitment/JobCategory';
 import JobStages from './pages/recruitment/JobStages';
 import JobApplications from './pages/recruitment/JobApplications';
+
+// Error Pages
+import Unauthorized from './pages/Unauthorized';
+import CompanyNotices from './pages/settings/CompanyNotices';
 
 function App() {
   return (
@@ -182,10 +189,14 @@ function App() {
 
             {/* Assets */}
             <Route path="/assets" element={<AssetsList />} />
+            {/* Assets */}
+            <Route path="/assets" element={<AssetsList />} />
+            <Route path="/assets/assignments" element={<AssetAssignmentList />} />
 
             {/* Training */}
             <Route path="/training" element={<Programs />} />
             <Route path="/training/programs" element={<Programs />} />
+            <Route path="/training/types" element={<TrainingTypeList />} />
 
             {/* Contracts */}
             <Route path="/contracts" element={<Contracts />} />
@@ -194,6 +205,8 @@ function App() {
 
             {/* Meetings */}
             <Route path="/meetings" element={<Meetings />} />
+            <Route path="/meetings/types" element={<MeetingTypes />} />
+            <Route path="/meetings/rooms" element={<MeetingRooms />} />
 
             {/* Reports */}
             <Route path="/reports" element={<AttendanceReport />} />
@@ -207,6 +220,7 @@ function App() {
             <Route path="/settings/divisions" element={<Divisions />} />
             <Route path="/settings/job-titles" element={<JobTitles />} />
             <Route path="/settings/holidays" element={<Holidays />} />
+            <Route path="/settings/company-notices" element={<CompanyNotices />} />
             <Route path="/settings/file-categories" element={<FileCategories />} />
             <Route path="/settings/document-config" element={<DocumentConfiguration />} />
 
@@ -217,6 +231,9 @@ function App() {
             <Route path="/admin/roles/:id/permissions" element={<RolePermissions />} />
             <Route path="/admin/permissions" element={<Permissions />} />
           </Route>
+
+          {/* Unauthorized */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Catch all - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

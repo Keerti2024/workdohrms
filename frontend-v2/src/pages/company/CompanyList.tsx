@@ -253,7 +253,7 @@ export default function CompanyList() {
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => resetForm()}>
+                        <Button className="bg-solarized-blue hover:bg-solarized-blue/90" onClick={() => resetForm()}>
                             <Plus className="mr-2 h-4 w-4" /> Add Company
                         </Button>
                     </DialogTrigger>
@@ -309,7 +309,7 @@ export default function CompanyList() {
                                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={isSubmitting}>
+                                <Button type="submit" className="bg-solarized-blue hover:bg-solarized-blue/90" disabled={isSubmitting}>
                                     {isSubmitting ? 'Saving...' : (editingCompany ? 'Update' : 'Create')}
                                 </Button>
                             </DialogFooter>

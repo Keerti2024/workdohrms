@@ -376,12 +376,18 @@ export const assetService = {
 };
 
 export const trainingService = {
-  getTypes: () => api.get('/training-types'),
+  // Training Types
+  getTypes: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/training-types', { params }),
+  getTypeById: (id: number) => api.get(`/training-types/${id}`),
   createType: (data: Record<string, unknown>) => api.post('/training-types', data),
+  updateType: (id: number, data: Record<string, unknown>) => api.put(`/training-types/${id}`, data),
+  deleteType: (id: number) => api.delete(`/training-types/${id}`),
+  // Training Programs
   getPrograms: (params?: { page?: number }) => api.get('/training-programs', { params }),
   createProgram: (data: Record<string, unknown>) => api.post('/training-programs', data),
   updateProgram: (id: number, data: Record<string, unknown>) => api.put(`/training-programs/${id}`, data),
   deleteProgram: (id: number) => api.delete(`/training-programs/${id}`),
+  // Training Sessions
   getSessions: (params?: { page?: number }) => api.get('/training-sessions', { params }),
   createSession: (data: Record<string, unknown>) => api.post('/training-sessions', data),
   enrollInSession: (sessionId: number, data: Record<string, unknown>) => api.post(`/training-sessions/${sessionId}/enroll`, data),
@@ -415,8 +421,13 @@ export const contractTypeService = {
 export const meetingService = {
   getTypes: () => api.get('/meeting-types'),
   createType: (data: Record<string, unknown>) => api.post('/meeting-types', data),
+  updateType: (id: number, data: Record<string, unknown>) => api.put(`/meeting-types/${id}`, data),
+  deleteType: (id: number) => api.delete(`/meeting-types/${id}`),
   getRooms: () => api.get('/meeting-rooms'),
   getAvailableRooms: () => api.get('/meeting-rooms-available'),
+  createRoom: (data: Record<string, unknown>) => api.post('/meeting-rooms', data),
+  updateRoom: (id: number, data: Record<string, unknown>) => api.put(`/meeting-rooms/${id}`, data),
+  deleteRoom: (id: number) => api.delete(`/meeting-rooms/${id}`),
   getAll: (params?: { page?: number }) => api.get('/meetings', { params }),
   getMeetings: (params?: { page?: number }) => api.get('/meetings', { params }),
   createMeeting: (data: Record<string, unknown>) => api.post('/meetings', data),
@@ -465,8 +476,12 @@ export const settingsService = {
   createHoliday: (data: Record<string, unknown>) => api.post('/company-holidays', data),
   updateHoliday: (id: number, data: Record<string, unknown>) => api.put(`/company-holidays/${id}`, data),
   deleteHoliday: (id: number) => api.delete(`/company-holidays/${id}`),
-  getNotices: () => api.get('/company-notices'),
-  createNotice: (data: Record<string, unknown>) => api.post('/company-notices', data),
+  getAll: (params?: any) => api.get('/company-notices', { params }),
+  getById: (id: number) => api.get(`/company-notices/${id}`),
+  create: (data: any) => api.post('/company-notices', data),
+  update: (id: number, data: any) => api.put(`/company-notices/${id}`, data),
+  delete: (id: number) => api.delete(`/company-notices/${id}`),
+  markAsRead: (id: number) => api.post(`/company-notices/${id}/read`),
   getFileCategories: () => api.get('/file-categories', { params: { paginate: false } }),
   createFileCategory: (data: Record<string, unknown>) => api.post('/file-categories', data),
   updateFileCategory: (id: number, data: Record<string, unknown>) => api.put(`/file-categories/${id}`, data),
@@ -533,7 +548,7 @@ export const assetTypeService = {
 
 export const documentTypeService = {
   getAll: (params?: { page?: number; search?: string; per_page?: number }) => api.get('/document-types', { params }),
-  getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/document-types', { params }),
+  // getAll: (params?: { page?: number; per_page?: number; search?: string }) => api.get('/document-types', { params }),
   getById: (id: number) => api.get(`/document-types/${id}`),
   create: (data: Record<string, unknown>) => api.post('/document-types', data),
   update: (id: number, data: Record<string, unknown>) => api.put(`/document-types/${id}`, data),

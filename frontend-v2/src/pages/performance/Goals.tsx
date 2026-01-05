@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { performanceService } from '../../services/api';
+import { performanceService, staffService } from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -79,22 +79,22 @@ interface ApiResponse {
 // Helper function to format ISO date to yyyy-MM-dd for date inputs
 const formatDateForInput = (isoDate: string): string => {
   if (!isoDate) return '';
-  
+
   // If it's already in yyyy-MM-dd format, return as is
   if (isoDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return isoDate;
   }
-  
+
   // If it's in ISO format (2026-01-01T00:00:00.000000Z), extract just the date part
   if (isoDate.includes('T')) {
     return isoDate.split('T')[0];
   }
-  
+
   // Try to parse the date and format it
   try {
     const date = new Date(isoDate);
     if (isNaN(date.getTime())) return '';
-    
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -108,10 +108,10 @@ const formatDateForInput = (isoDate: string): string => {
 // Helper function to format date for display
 const formatDateForDisplay = (isoDate: string): string => {
   if (!isoDate) return '-';
-  
+
   const datePart = formatDateForInput(isoDate);
   if (!datePart) return '-';
-  
+
   // Convert from yyyy-MM-dd to a more readable format like Jan 1, 2026
   try {
     const [year, month, day] = datePart.split('-').map(Number);
@@ -132,18 +132,19 @@ export default function Goals() {
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  
+  const [isLoadingStaff, setIsLoadingStaff] = useState(false);
+
   // Dialog states
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isProgressDialogOpen, setIsProgressDialogOpen] = useState(false);
   const [isRatingDialogOpen, setIsRatingDialogOpen] = useState(false);
-  
+
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [viewingGoal, setViewingGoal] = useState<Goal | null>(null);
   const [updatingGoal, setUpdatingGoal] = useState<Goal | null>(null);
   const [ratingGoal, setRatingGoal] = useState<Goal | null>(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -155,12 +156,12 @@ export default function Goals() {
     start_date: '',
     due_date: '',
   });
-  
+
   const [progressData, setProgressData] = useState({
     current_value: '',
     notes: '',
   });
-  
+
   const [ratingData, setRatingData] = useState({
     rating: 'meets' as 'exceeds' | 'meets' | 'below' | 'needs_improvement',
     manager_notes: '',
@@ -168,13 +169,14 @@ export default function Goals() {
 
   useEffect(() => {
     fetchGoals();
+    fetchAllStaffMembers();
   }, [page]);
 
   const fetchGoals = async () => {
     setIsLoading(true);
     try {
       const response = await performanceService.getGoals({ page });
-      
+
       // Handle different response structures
       if (response.data.success === false) {
         console.error('API Error:', response.data.message);
@@ -182,10 +184,10 @@ export default function Goals() {
         setMeta(null);
         return;
       }
-      
+
       // Check if response.data is an array or has a data property
       const responseData = response.data;
-      
+
       if (Array.isArray(responseData)) {
         // Direct array response
         setGoals(responseData);
@@ -220,33 +222,35 @@ export default function Goals() {
     }
   };
 
-  const fetchStaffMembers = async () => {
+  const fetchAllStaffMembers = async () => {
+    setIsLoadingStaff(true);
     try {
-      // Extract unique staff members from goals
-      const uniqueStaffMembers: StaffMember[] = [];
-      const seenIds = new Set<number>();
-      
-      goals.forEach(goal => {
-        if (goal.staff_member && goal.staff_member_id && !seenIds.has(goal.staff_member_id)) {
-          uniqueStaffMembers.push({
-            id: goal.staff_member_id,
-            full_name: goal.staff_member.full_name
-          });
-          seenIds.add(goal.staff_member_id);
+      const response = await staffService.getAll({ per_page: 100 }); // Adjust per_page as needed
+
+      // Handle different response structures
+      if (response.data.success && response.data.data) {
+        if (Array.isArray(response.data.data)) {
+          setStaffMembers(response.data.data);
+        } else if (response.data.data.data && Array.isArray(response.data.data.data)) {
+          setStaffMembers(response.data.data.data);
+        } else {
+          setStaffMembers([]);
         }
-      });
-      
-      setStaffMembers(uniqueStaffMembers);
+      } else if (Array.isArray(response.data)) {
+        setStaffMembers(response.data);
+      } else if (response.data.data && Array.isArray(response.data.data)) {
+        setStaffMembers(response.data.data);
+      } else {
+        setStaffMembers([]);
+      }
     } catch (error) {
-      console.error('Failed to extract staff members:', error);
+      console.error('Failed to fetch staff members:', error);
+      showAlert('error', 'Error', 'Failed to load staff members');
+      setStaffMembers([]);
+    } finally {
+      setIsLoadingStaff(false);
     }
   };
-
-  useEffect(() => {
-    if (goals.length > 0) {
-      fetchStaffMembers();
-    }
-  }, [goals]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,12 +282,12 @@ export default function Goals() {
       } else {
         await performanceService.createGoal(data);
       }
-                 showAlert(
+      showAlert(
         'success',
         'Success!',
         editingGoal ? 'Goal updated successfully' : 'Goal created successfully',
         2000
-      ); 
+      );
       setIsGoalDialogOpen(false);
       setEditingGoal(null);
       resetForm();
@@ -297,13 +301,13 @@ export default function Goals() {
   const handleProgressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!updatingGoal) return;
-    
+
     try {
       const data = {
         current_value: parseFloat(progressData.current_value),
         notes: progressData.notes,
       };
-      
+
       await performanceService.updateProgress(updatingGoal.id, data);
       showAlert('success', 'Success!', 'Progress updated successfully', 2000);
       setIsProgressDialogOpen(false);
@@ -319,15 +323,15 @@ export default function Goals() {
   const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ratingGoal) return;
-    
+
     try {
       await performanceService.rateGoal(ratingGoal.id, ratingData);
       showAlert('success', 'Success!', 'Goal rated successfully', 2000);
       setIsRatingDialogOpen(false);
       setRatingGoal(null);
-      setRatingData({ 
-        rating: 'meets', 
-        manager_notes: '' 
+      setRatingData({
+        rating: 'meets',
+        manager_notes: ''
       });
       fetchGoals();
     } catch (error) {
@@ -404,7 +408,7 @@ export default function Goals() {
     if (isOverdue && status !== 'completed') {
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
     }
-    
+
     const variants: Record<string, string> = {
       not_started: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
       in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -438,12 +442,12 @@ export default function Goals() {
     if (goal.completion_percentage !== undefined) {
       return goal.completion_percentage;
     }
-    
+
     // Calculate from current/target values
     if (goal.target_value && goal.target_value > 0 && goal.current_value !== null) {
       return Math.min(100, (goal.current_value / goal.target_value) * 100);
     }
-    
+
     // Fallback based on status
     if (goal.status === 'completed') return 100;
     if (goal.status === 'in_progress') return 50;
@@ -463,12 +467,12 @@ export default function Goals() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Performance Objectives</h1>
           <p className="text-gray-600 dark:text-gray-400">Set and track performance objectives</p>
         </div>
-        
+
         {/* Create/Edit Goal Dialog */}
         <Dialog open={isGoalDialogOpen} onOpenChange={setIsGoalDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-solarized-blue hover:bg-solarized-blue/90 text-white"
               onClick={() => {
                 setEditingGoal(null);
                 resetForm();
@@ -506,19 +510,25 @@ export default function Goals() {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select staff member" />
+                        <SelectValue placeholder={
+                          isLoadingStaff ? "Loading staff members..." : "Select staff member"
+                        } />
                       </SelectTrigger>
                       <SelectContent>
-                        {staffMembers.map((staff) => (
-                          <SelectItem key={staff.id} value={staff.id.toString()}>
-                            {staff.full_name}
-                          </SelectItem>
-                        ))}
+                        {staffMembers.length === 0 && !isLoadingStaff ? (
+                          <SelectItem value="" disabled>No staff members found</SelectItem>
+                        ) : (
+                          staffMembers.map((staff) => (
+                            <SelectItem key={staff.id} value={staff.id.toString()}>
+                              {staff.full_name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
                   <Textarea
@@ -529,7 +539,7 @@ export default function Goals() {
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="objective_type">Type *</Label>
@@ -570,7 +580,7 @@ export default function Goals() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="target_value">Target Value</Label>
@@ -610,7 +620,7 @@ export default function Goals() {
                 <Button type="button" variant="outline" onClick={() => setIsGoalDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button type="submit" className="bg-solarized-blue hover:bg-solarized-blue/90 text-white">
                   {editingGoal ? 'Update' : 'Create'}
                 </Button>
               </DialogFooter>
@@ -749,7 +759,7 @@ export default function Goals() {
                   <Button type="button" variant="outline" onClick={() => setIsProgressDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button type="submit" className="bg-solarized-blue hover:bg-solarized-blue/90 text-white">
                     Update Progress
                   </Button>
                 </DialogFooter>
@@ -774,7 +784,7 @@ export default function Goals() {
                     <Label htmlFor="rating">Rating *</Label>
                     <Select
                       value={ratingData.rating}
-                      onValueChange={(value: 'exceeds' | 'meets' | 'below' | 'needs_improvement') => 
+                      onValueChange={(value: 'exceeds' | 'meets' | 'below' | 'needs_improvement') =>
                         setRatingData({ ...ratingData, rating: value })}
                       required
                     >
@@ -885,7 +895,7 @@ export default function Goals() {
             <Target className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No objectives found</h3>
             <p className="text-gray-600 dark:text-gray-400 mt-1">Create performance objectives to track employee performance.</p>
-            <Button 
+            <Button
               className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => setIsGoalDialogOpen(true)}
             >
@@ -933,8 +943,8 @@ export default function Goals() {
                             Rate
                           </DropdownMenuItem>
                           {/* <DropdownMenuSeparator /> */}
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(goal.id)} 
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(goal.id)}
                             className="text-red-600 dark:text-red-400"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -954,9 +964,9 @@ export default function Goals() {
                         {goal.is_overdue && ' (Overdue)'}
                       </Badge>
                     </div>
-                    
+
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{goal.description || 'No description'}</p>
-                    
+
                     {goal.target_value !== null && goal.target_value > 0 && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
@@ -970,7 +980,7 @@ export default function Goals() {
                         <Progress value={progress} className="h-2" />
                       </div>
                     )}
-                    
+
                     <div className="flex items-center justify-between text-sm">
                       <div>
                         <p className="text-gray-600 dark:text-gray-400">Target</p>
@@ -984,11 +994,11 @@ export default function Goals() {
                         <p className="font-medium text-gray-900 dark:text-gray-100">{goal.weight_percentage ? `${goal.weight_percentage}%` : '-'}</p>
                       </div>
                     </div>
-                    
+
                     <p className="text-xs text-gray-500 dark:text-gray-500">
                       Due: {formatDateForDisplay(goal.due_date)}
                     </p>
-                    
+
                     {goal.rating && (
                       <Badge className={getRatingBadge(goal.rating)}>
                         Rating: {goal.rating.replace('_', ' ')}
