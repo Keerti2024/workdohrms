@@ -97,6 +97,9 @@ import JobCategories from './pages/recruitment/JobCategory';
 import JobStages from './pages/recruitment/JobStages';
 import JobApplications from './pages/recruitment/JobApplications';
 
+// Error Pages
+import Unauthorized from './pages/Unauthorized';
+
 function App() {
   return (
     <AuthProvider>
@@ -218,6 +221,9 @@ function App() {
             <Route path="/admin/roles/:id/permissions" element={<RolePermissions />} />
             <Route path="/admin/permissions" element={<Permissions />} />
           </Route>
+
+          {/* Unauthorized */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Catch all - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
