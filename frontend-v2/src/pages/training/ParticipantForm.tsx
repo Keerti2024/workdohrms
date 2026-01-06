@@ -22,6 +22,12 @@ interface Staff {
     staff_code?: string;
 }
 
+// ADDED: training_program_id support
+interface TrainingProgram {
+    id: number;
+    title: string;
+}
+
 export default function ParticipantForm() {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -31,10 +37,14 @@ export default function ParticipantForm() {
     const [isSaving, setIsSaving] = useState(false);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [staffMembers, setStaffMembers] = useState<Staff[]>([]);
+    // ADDED: training_program_id support
+    const [trainingPrograms, setTrainingPrograms] = useState<TrainingProgram[]>([]);
 
+    // ADDED: training_program_id support
     const [formData, setFormData] = useState({
         training_session_id: '',
         staff_member_id: '',
+        training_program_id: '',
         status: 'enrolled',
         attendance_status: 'pending',
         score: '',
@@ -46,7 +56,8 @@ export default function ParticipantForm() {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                await Promise.all([fetchSessions(), fetchStaff()]);
+                // ADDED: training_program_id support
+                await Promise.all([fetchSessions(), fetchStaff(), fetchTrainingPrograms()]);
                 if (isEditMode) {
                     await fetchParticipant();
                 }
@@ -79,6 +90,17 @@ export default function ParticipantForm() {
         }
     };
 
+    // ADDED: training_program_id support
+    const fetchTrainingPrograms = async () => {
+        try {
+            const response = await trainingService.getPrograms({ paginate: 'false' } as any);
+            const data = response.data.data || response.data;
+            setTrainingPrograms(Array.isArray(data) ? data : (data.data || []));
+        } catch (error) {
+            console.error('Failed to fetch training programs:', error);
+        }
+    };
+
     const fetchParticipant = async () => {
         try {
             const response = await trainingService.getParticipants({ paginate: 'false' });
@@ -86,9 +108,11 @@ export default function ParticipantForm() {
             const participant = Array.isArray(all) ? all.find((p: any) => p.id === Number(id)) : null;
 
             if (participant) {
+                // ADDED: training_program_id support
                 setFormData({
                     training_session_id: String(participant.training_session_id),
                     staff_member_id: String(participant.staff_member_id),
+                    training_program_id: participant.training_program_id ? String(participant.training_program_id) : '',
                     status: participant.status,
                     attendance_status: participant.attendance_status || 'pending',
                     score: participant.score || '',
@@ -109,8 +133,10 @@ export default function ParticipantForm() {
         e.preventDefault();
         setIsSaving(true);
         try {
+            // ADDED: training_program_id support
             const payload = {
                 ...formData,
+                training_program_id: formData.training_program_id ? Number(formData.training_program_id) : null,
                 score: formData.score ? Number(formData.score) : null,
             };
 
@@ -118,8 +144,10 @@ export default function ParticipantForm() {
                 await trainingService.updateParticipant(id!, payload);
                 showAlert('success', 'Updated', 'Participant updated successfully', 2000);
             } else {
+                // ADDED: training_program_id support
                 await trainingService.enrollInSession(Number(formData.training_session_id), {
                     staff_member_id: Number(formData.staff_member_id),
+                    training_program_id: payload.training_program_id,
                     status: formData.status,
                     attendance_status: formData.attendance_status,
                     score: payload.score,
@@ -170,7 +198,27 @@ export default function ParticipantForm() {
                         <CardTitle className="text-lg font-semibold text-solarized-base02">Enrollment Details</CardTitle>
                         <CardDescription>Select the session and the employee to enroll.</CardDescription>
                     </CardHeader>
-                    <CardContent className="grid gap-6 md:grid-cols-2">
+                    <CardContent className="grid gap-6 md:grid-cols-3">
+                        {/* ADDED: training_program_id support - moved before session */}
+                        <div className="space-y-2">
+                            <Label htmlFor="training_program">Training Program (Optional)</Label>
+                            <Select
+                                value={formData.training_program_id}
+                                onValueChange={(val) => setFormData({ ...formData, training_program_id: val })}
+                            >
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue placeholder="Select program (optional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {trainingPrograms.map((program) => (
+                                        <SelectItem key={program.id} value={String(program.id)}>
+                                            {program.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="session">Session *</Label>
                             <Select
@@ -201,7 +249,7 @@ export default function ParticipantForm() {
                                 <SelectTrigger className="bg-white">
                                     <SelectValue placeholder="Select employee" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[300px]" position="popper">
                                     {staffMembers.map((staff) => (
                                         <SelectItem key={staff.id} value={String(staff.id)}>
                                             {staff.full_name}

@@ -38,10 +38,17 @@ interface Staff {
     staff_code?: string;
 }
 
+// ADDED: training_program_id support
+interface TrainingProgram {
+    id: number;
+    title: string;
+}
+
 interface Participant {
     id: number;
     training_session_id: number;
     staff_member_id: number;
+    training_program_id?: number | null;
     status: string;
     attendance_status: string | null;
     score: string | null;
@@ -50,6 +57,7 @@ interface Participant {
     certificate_issued_at: string | null;
     session?: Session;
     staff_member?: Staff;
+    training_program?: TrainingProgram;
 }
 
 interface PaginationMeta {
@@ -175,10 +183,18 @@ export default function Participants() {
                                     <p className="text-sm text-solarized-base01">Employee ID: {viewingParticipant.staff_member_id}</p>
                                 </div>
                             </div>
+                            {/* ADDED: training_program_id support */}
+                            {viewingParticipant.training_program && (
+                                <div>
+                                    <p className="text-sm text-solarized-base01">Training Program</p>
+                                    <p className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-solarized-blue" /> {viewingParticipant.training_program.title}</p>
+                                </div>
+                            )}
                             <div>
                                 <p className="text-sm text-solarized-base01">Session</p>
                                 <p className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-solarized-cyan" /> {viewingParticipant.session?.session_name}</p>
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-sm text-solarized-base01">Status</p>

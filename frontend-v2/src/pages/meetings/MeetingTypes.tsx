@@ -30,12 +30,14 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 
+// ADDED: meeting type status support
 interface MeetingType {
     id: number;
     title: string;
     description: string;
     default_duration: number;
     color: string;
+    status: 'active' | 'inactive';
     meetings_count?: number;
 }
 
@@ -45,11 +47,13 @@ export default function MeetingTypes() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingType, setEditingType] = useState<MeetingType | null>(null);
 
+    // ADDED: meeting type status support
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         default_duration: 60,
         color: '#6366f1',
+        status: 'active' as 'active' | 'inactive',
     });
 
     useEffect(() => {
@@ -108,6 +112,7 @@ export default function MeetingTypes() {
             description: '',
             default_duration: 60,
             color: '#6366f1',
+            status: 'active',
         });
         setEditingType(null);
     };
@@ -162,9 +167,21 @@ export default function MeetingTypes() {
                                             {type.default_duration} mins default
                                         </p>
                                     </div>
-                                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider">
-                                        {type.meetings_count || 0} Meetings
-                                    </Badge>
+                                    {/* ADDED: meeting type status support */}
+                                    <div className="flex items-center gap-2">
+                                        <Badge
+                                            variant="outline"
+                                            className={`text-[10px] font-bold uppercase tracking-wider ${type.status === 'active'
+                                                ? 'bg-solarized-green/10 text-solarized-green border-solarized-green/30'
+                                                : 'bg-solarized-base01/10 text-solarized-base01 border-solarized-base01/30'
+                                                }`}
+                                        >
+                                            {type.status}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider">
+                                            {type.meetings_count || 0} Meetings
+                                        </Badge>
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -183,6 +200,7 @@ export default function MeetingTypes() {
                                                 description: type.description || '',
                                                 default_duration: type.default_duration,
                                                 color: type.color,
+                                                status: type.status || 'active',
                                             });
                                             setIsDialogOpen(true);
                                         }}
@@ -274,6 +292,20 @@ export default function MeetingTypes() {
                                     rows={3}
                                 />
                             </div>
+
+                            {/* ADDED: meeting type status support */}
+                            <div className="space-y-2">
+                                <Label htmlFor="status">Status</Label>
+                                <select
+                                    id="status"
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -286,6 +318,6 @@ export default function MeetingTypes() {
                     </form>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

@@ -96,8 +96,10 @@ class TrainingSessionController extends Controller
 
     public function enroll(Request $request, TrainingSession $trainingSession)
     {
+        // ADDED: training_program_id support
         $validator = Validator::make($request->all(), [
             'staff_member_id' => 'required|exists:staff_members,id',
+            'training_program_id' => 'nullable|exists:training_programs,id',
             'status' => 'nullable|in:enrolled,withdrawn,completed',
             'attendance_status' => 'nullable|in:pending,present,absent',
             'score' => 'nullable|numeric|min:0|max:100',
@@ -124,8 +126,10 @@ class TrainingSessionController extends Controller
             return $this->error('Session is at full capacity', 400);
         }
 
+        // ADDED: training_program_id support
         $data = $request->only([
             'staff_member_id',
+            'training_program_id',
             'status',
             'attendance_status',
             'score',
@@ -154,8 +158,9 @@ class TrainingSessionController extends Controller
 
     public function employeeTraining($staffMemberId)
     {
+        // ADDED: training_program_id support - eager load trainingProgram
         $trainings = TrainingParticipant::where('staff_member_id', $staffMemberId)
-            ->with(['session.program.trainingType'])
+            ->with(['session.program.trainingType', 'trainingProgram'])
             ->get();
 
         return $this->success($trainings);
@@ -163,7 +168,8 @@ class TrainingSessionController extends Controller
 
     public function allParticipants(Request $request)
     {
-        $query = TrainingParticipant::with(['session.program', 'staffMember']);
+        // ADDED: training_program_id support - eager load trainingProgram
+        $query = TrainingParticipant::with(['session.program', 'staffMember', 'trainingProgram']);
 
         if ($request->training_session_id) {
             $query->where('training_session_id', $request->training_session_id);
@@ -181,7 +187,9 @@ class TrainingSessionController extends Controller
 
     public function updateParticipant(Request $request, TrainingParticipant $trainingParticipant)
     {
+        // ADDED: training_program_id support
         $validator = Validator::make($request->all(), [
+            'training_program_id' => 'nullable|exists:training_programs,id',
             'status' => 'nullable|in:enrolled,withdrawn,completed',
             'attendance_status' => 'nullable|in:pending,present,absent',
             'score' => 'nullable|numeric|min:0|max:100',

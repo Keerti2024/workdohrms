@@ -83,7 +83,7 @@ import MeetingCalendar from './pages/meetings/MeetingCalendar';
 import MeetingTypes from './pages/meetings/MeetingTypes';
 import MeetingRooms from './pages/meetings/MeetingRooms';
 import MeetingMinutesPage from './pages/meetings/MeetingMinutesPage';
-import MeetingActionItemsPage from './pages/meetings/MeetingActionItemsPage';
+// import MeetingActionItemsPage from './pages/meetings/MeetingActionItemsPage';
 
 
 // ... (existing imports)
@@ -226,7 +226,7 @@ function App() {
             <Route path="/meeting" element={<Meetings />} />
             <Route path="/meetings/calendar" element={<MeetingCalendar />} />
             <Route path="/meetings/minutes" element={<MeetingMinutesPage />} />
-            <Route path="/meetings/action-items" element={<MeetingActionItemsPage />} />
+            {/* <Route path="/meetings/action-items" element={<MeetingActionItemsPage />} /> */}
             <Route path="/meetings/types" element={<MeetingTypes />} />
             <Route path="/meetings/rooms" element={<MeetingRooms />} />
 
