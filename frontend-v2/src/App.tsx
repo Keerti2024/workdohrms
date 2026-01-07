@@ -25,7 +25,7 @@ import OrganizationList from './pages/organization/OrganizationList';
 import CompanyList from './pages/company/CompanyList';
 
 // Assets
-import AssetTypeList from './pages/assets/AssetTypeList';
+import AssetsList from './pages/assets/AssetsList';
 import AssetAssignmentList from './pages/assets/AssetAssignmentList';
 // Documents
 import DocumentTypeList from './pages/documents/DocumentTypeList';
@@ -46,6 +46,7 @@ import LeaveCategories from './pages/leave/LeaveCategories';
 
 // Payroll
 import SalarySlips from './pages/payroll/SalarySlips';
+import MySalarySlip from './pages/payroll/MySalarySlip';
 import GeneratePayroll from './pages/payroll/GeneratePayroll';
 import Benefits from './pages/payroll/Benefits';
 import Deductions from './pages/payroll/Deductions';
@@ -63,7 +64,8 @@ import ParticipantForm from './pages/training/ParticipantForm';
 import Appraisals from './pages/performance/Appraisals';
 
 // Assets
-import AssetsList from './pages/assets/AssetsList';
+// import AssetsList from './pages/assets/AssetsList';
+// import AssetAssignmentList from './pages/assets/AssetAssignmentList';
 
 // Training
 import Programs from './pages/training/Programs';
@@ -83,7 +85,8 @@ import MeetingCalendar from './pages/meetings/MeetingCalendar';
 import MeetingTypes from './pages/meetings/MeetingTypes';
 import MeetingRooms from './pages/meetings/MeetingRooms';
 import MeetingMinutesPage from './pages/meetings/MeetingMinutesPage';
-// import MeetingActionItemsPage from './pages/meetings/MeetingActionItemsPage';
+import MeetingActionItemsPage from './pages/meetings/MeetingActionItemsPage';
+import MeetingAttendeesPage from './pages/meetings/MeetingAttendeesPage';
 
 
 // ... (existing imports)
@@ -156,16 +159,17 @@ function App() {
             <Route path="/staff/:id" element={<StaffProfile />} />
             <Route path="/staff/:id/edit" element={<StaffEdit />} />
 
-            {/* Organization */}
-            <Route path="/organizations" element={<OrganizationList />} />
-            <Route path="/companies" element={<CompanyList />} />
+                        {/* Organization */}
+                        <Route path="/organizations" element={<OrganizationList />} />
+                        <Route path="/companies" element={<CompanyList />} />
 
-            {/* Assets */}
-            <Route path="/assets/types" element={<AssetTypeList />} />
+           {/* Assets */}
+            <Route path="/assets" element={<AssetsList />} />
+            <Route path="/assets/assignments" element={<AssetAssignmentList />} />
 
-            {/* Documents */}
-            <Route path="/documents/types" element={<DocumentTypeList />} />
-            <Route path="/documents/locations" element={<DocumentLocationList />} />
+                        {/* Documents */}
+                        <Route path="/documents/types" element={<DocumentTypeList />} />
+                        <Route path="/documents/locations" element={<DocumentLocationList />} />
 
             {/* Attendance */}
             <Route path="/attendance" element={<ClockInOut />} />
@@ -189,6 +193,7 @@ function App() {
             {/* Payroll */}
             <Route path="/payroll" element={<SalarySlips />} />
             <Route path="/payroll/slips" element={<SalarySlips />} />
+            <Route path="/payroll/my-slips" element={<MySalarySlip />} />
             <Route path="/payroll/generate" element={<GeneratePayroll />} />
             <Route path="/payroll/benefits" element={<Benefits />} />
             <Route path="/payroll/benefits/types" element={<BenefitTypes />} />
@@ -234,7 +239,8 @@ function App() {
             <Route path="/meeting" element={<Meetings />} />
             <Route path="/meetings/calendar" element={<MeetingCalendar />} />
             <Route path="/meetings/minutes" element={<MeetingMinutesPage />} />
-            {/* <Route path="/meetings/action-items" element={<MeetingActionItemsPage />} /> */}
+            <Route path="/meetings/action-items" element={<MeetingActionItemsPage />} />
+            <Route path="/meetings/attendees" element={<MeetingAttendeesPage />} />
             <Route path="/meetings/types" element={<MeetingTypes />} />
             <Route path="/meetings/rooms" element={<MeetingRooms />} />
 
