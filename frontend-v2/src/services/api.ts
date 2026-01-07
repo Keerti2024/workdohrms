@@ -87,6 +87,8 @@ export const attendanceService = {
     end_date?: string; 
     page?: number 
   }) => api.get('/my-logs', { params }),
+  getSummary: (params?: Record<string, unknown>) =>
+    api.get('/attendance-summary', { params }),
   
   getMySummary: (params?: Record<string, unknown>) => 
     api.get('/my-summary', { params }),
